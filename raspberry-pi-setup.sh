@@ -166,8 +166,8 @@ print_status "Exchange monitor script created"
 print_info "Setting up Nginx configuration..."
 cat > /etc/nginx/sites-available/karavan << 'EOF'
 server {
-    listen 80;
-    server_name localhost;
+    listen 7000;
+    server_name localhost corlukaravan.shop;
     
     # Security headers
     add_header X-Frame-Options DENY;
@@ -211,7 +211,7 @@ server {
         add_header Pragma "no-cache";
     }
     
-    # CRITICAL: Exchange Rates - Special no-cache handling
+    # CRITICAL: Exchange Rates - Special no-cache handling for corlukaravan.shop
     location /api/exchange-rates {
         proxy_pass http://127.0.0.1:8001;
         proxy_http_version 1.1;
@@ -230,15 +230,16 @@ server {
         add_header ETag off;
         if_modified_since off;
         add_header X-Timestamp $msec;
-        add_header X-No-Cache "LIVE-$msec";
+        add_header X-No-Cache "CORLUKARAVAN-LIVE-$msec";
+        add_header X-Domain "corlukaravan.shop";
         
         proxy_connect_timeout 90s;
         proxy_send_timeout 90s;
         proxy_read_timeout 90s;
     }
     
-    access_log /var/log/nginx/karavan-access.log;
-    error_log /var/log/nginx/karavan-error.log;
+    access_log /var/log/nginx/corlukaravan-access.log;
+    error_log /var/log/nginx/corlukaravan-error.log;
 }
 EOF
 
