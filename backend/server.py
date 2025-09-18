@@ -477,125 +477,192 @@ class User(BaseModel):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     is_active: bool = True
 
-# Currency conversion service
+# Currency conversion service - Enhanced for Raspberry Pi stability
 class CurrencyService:
     def __init__(self):
         self.api_key = os.environ.get('FREECURRENCY_API_KEY')
         self.api_url = "https://api.freecurrencyapi.com/v1/latest"
         self.rates_cache = {}
         self.last_update = None
+        self.cache_duration = 3600  # 1 hour cache
+        self.max_retries = 3
+        self.retry_delay = 5  # seconds
+        self.api_timeout = 30  # Increased for Raspberry Pi
     
     async def get_exchange_rates(self) -> Dict[str, Decimal]:
-        """Get current exchange rates from FreeCurrencyAPI"""
-        try:
-            if not self.api_key:
-                raise Exception("FREECURRENCY_API_KEY not found in environment variables")
-            
-            # Get rates with TRY as base currency to get foreign currencies in terms of TRY
-            params = {
-                'apikey': self.api_key,
-                'base_currency': 'TRY',
-                'currencies': 'USD,EUR,GBP'
-            }
-            
-            response = requests.get(self.api_url, params=params, timeout=15)
-            response.raise_for_status()
-            data = response.json()
-            
-            if 'data' not in data:
-                raise Exception(f"Invalid API response format: {data}")
-            
-            rates_data = data['data']
-            
-            # FreeCurrencyAPI gives us rates FROM TRY TO other currencies
-            # But we need rates FROM other currencies TO TRY
-            # So we need to invert the rates
-            rates = {'TRY': Decimal('1')}  # Base currency
-            
-            for currency, rate_value in rates_data.items():
-                if rate_value and rate_value > 0:
-                    # Convert to TRY rate (invert the rate)
-                    # If 1 TRY = 0.036 USD, then 1 USD = 1/0.036 = 27.77 TRY
-                    try_to_foreign = Decimal(str(rate_value))
-                    foreign_to_try = Decimal('1') / try_to_foreign
-                    rates[currency] = foreign_to_try
-            
-            # Fallback: if above doesn't work, try with USD as base
-            if len(rates) <= 1:  # Only TRY in rates
-                params = {
-                    'apikey': self.api_key,
-                    'base_currency': 'USD',
-                    'currencies': 'TRY,EUR,GBP'
-                }
+        """Get current exchange rates with enhanced Raspberry Pi support"""
+        
+        # Check if cache is still valid (within cache duration)
+        if (self.rates_cache and self.last_update and 
+            (datetime.now(timezone.utc) - self.last_update).total_seconds() < self.cache_duration):
+            logger.info("Using cached exchange rates (still valid)")
+            return self.rates_cache
+        
+        # Try to fetch fresh rates with retry mechanism
+        for attempt in range(self.max_retries):
+            try:
+                logger.info(f"Attempting to fetch exchange rates (attempt {attempt + 1}/{self.max_retries})")
                 
-                response = requests.get(self.api_url, params=params, timeout=15)
+                if not self.api_key:
+                    raise Exception("FREECURRENCY_API_KEY not found in environment variables")
+                
+                # Primary attempt: TRY as base currency
+                rates = await self._fetch_rates_try_base()
+                
+                if len(rates) > 1:  # We got valid rates
+                    await self._save_rates_to_db(rates)
+                    self.rates_cache = rates
+                    self.last_update = datetime.now(timezone.utc)
+                    logger.info(f"FreeCurrencyAPI exchange rates updated: {rates}")
+                    return rates
+                
+                # Fallback: USD as base currency
+                logger.warning("TRY base failed, trying USD base")
+                rates = await self._fetch_rates_usd_base()
+                
+                if len(rates) > 1:  # We got valid rates
+                    await self._save_rates_to_db(rates)
+                    self.rates_cache = rates
+                    self.last_update = datetime.now(timezone.utc)
+                    logger.info(f"FreeCurrencyAPI exchange rates updated (USD base): {rates}")
+                    return rates
+                    
+            except Exception as e:
+                logger.error(f"Attempt {attempt + 1} failed to fetch exchange rates: {e}")
+                
+                if attempt < self.max_retries - 1:
+                    logger.info(f"Waiting {self.retry_delay} seconds before retry...")
+                    await asyncio.sleep(self.retry_delay)
+                    self.retry_delay *= 2  # Exponential backoff
+                
+        # All attempts failed, use fallback strategies
+        logger.warning("All API attempts failed, using fallback strategies")
+        return await self._get_fallback_rates()
+    
+    async def _fetch_rates_try_base(self) -> Dict[str, Decimal]:
+        """Fetch rates with TRY as base currency"""
+        params = {
+            'apikey': self.api_key,
+            'base_currency': 'TRY',
+            'currencies': 'USD,EUR,GBP'
+        }
+        
+        import aiohttp
+        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=self.api_timeout)) as session:
+            async with session.get(self.api_url, params=params) as response:
                 response.raise_for_status()
-                data = response.json()
+                data = await response.json()
                 
-                if 'data' in data:
-                    rates_data = data['data']
-                    
-                    # USD is base, so TRY rate is direct
-                    if 'TRY' in rates_data:
-                        usd_to_try = Decimal(str(rates_data['TRY']))
-                        rates['USD'] = usd_to_try
-                    
-                    # For EUR and GBP, we need to convert via USD
-                    if 'EUR' in rates_data and 'TRY' in rates_data:
-                        eur_to_usd = Decimal(str(rates_data['EUR']))
-                        usd_to_try = Decimal(str(rates_data['TRY']))
-                        eur_to_try = eur_to_usd * usd_to_try
-                        rates['EUR'] = eur_to_try
-                    
-                    if 'GBP' in rates_data and 'TRY' in rates_data:
-                        gbp_to_usd = Decimal(str(rates_data['GBP']))
-                        usd_to_try = Decimal(str(rates_data['TRY']))
-                        gbp_to_try = gbp_to_usd * usd_to_try
-                        rates['GBP'] = gbp_to_try
-            
-            # Ensure we have the major currencies with fallback values
-            if 'USD' not in rates:
-                rates['USD'] = Decimal('27.5')  # Fallback
-            if 'EUR' not in rates:
-                rates['EUR'] = Decimal('30.0')  # Fallback  
-            if 'GBP' not in rates:
-                rates['GBP'] = Decimal('35.0')  # Fallback
-            
-            self.rates_cache = rates
-            self.last_update = datetime.now(timezone.utc)
-            
-            # Save to database
+                if 'data' not in data:
+                    raise Exception(f"Invalid API response format: {data}")
+                
+                rates_data = data['data']
+                rates = {'TRY': Decimal('1')}  # Base currency
+                
+                for currency, rate_value in rates_data.items():
+                    if rate_value and rate_value > 0:
+                        try_to_foreign = Decimal(str(rate_value))
+                        foreign_to_try = Decimal('1') / try_to_foreign
+                        rates[currency] = foreign_to_try
+                
+                return rates
+    
+    async def _fetch_rates_usd_base(self) -> Dict[str, Decimal]:
+        """Fetch rates with USD as base currency"""
+        params = {
+            'apikey': self.api_key,
+            'base_currency': 'USD', 
+            'currencies': 'TRY,EUR,GBP'
+        }
+        
+        import aiohttp
+        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=self.api_timeout)) as session:
+            async with session.get(self.api_url, params=params) as response:
+                response.raise_for_status()
+                data = await response.json()
+                
+                if 'data' not in data:
+                    raise Exception(f"Invalid API response format: {data}")
+                
+                rates_data = data['data']
+                rates = {'TRY': Decimal('1')}
+                
+                # USD is base, so TRY rate is direct
+                if 'TRY' in rates_data:
+                    usd_to_try = Decimal(str(rates_data['TRY']))
+                    rates['USD'] = usd_to_try
+                
+                # For EUR and GBP, convert via USD
+                if 'EUR' in rates_data and 'TRY' in rates_data:
+                    eur_to_usd = Decimal(str(rates_data['EUR']))
+                    usd_to_try = Decimal(str(rates_data['TRY']))
+                    eur_to_try = eur_to_usd * usd_to_try
+                    rates['EUR'] = eur_to_try
+                
+                if 'GBP' in rates_data and 'TRY' in rates_data:
+                    gbp_to_usd = Decimal(str(rates_data['GBP']))
+                    usd_to_try = Decimal(str(rates_data['TRY']))
+                    gbp_to_try = gbp_to_usd * usd_to_try
+                    rates['GBP'] = gbp_to_try
+                
+                return rates
+    
+    async def _save_rates_to_db(self, rates: Dict[str, Decimal]):
+        """Save exchange rates to database"""
+        try:
+            update_time = datetime.now(timezone.utc)
             for currency, rate in rates.items():
                 await db.exchange_rates.replace_one(
                     {'currency': currency},
                     {
                         'currency': currency,
                         'rate_to_try': float(rate),
-                        'updated_at': self.last_update
+                        'updated_at': update_time
                     },
                     upsert=True
                 )
-            
-            logger.info(f"FreeCurrencyAPI exchange rates updated: {rates}")
-            return rates
-            
+            logger.info("Exchange rates saved to database successfully")
         except Exception as e:
-            logger.error(f"Failed to fetch FreeCurrencyAPI exchange rates: {e}")
-            # Try to get from database as fallback
+            logger.error(f"Failed to save rates to database: {e}")
+    
+    async def _get_fallback_rates(self) -> Dict[str, Decimal]:
+        """Get fallback exchange rates from database or defaults"""
+        try:
+            # Try to get from database first
             rates_from_db = await db.exchange_rates.find().to_list(None)
             if rates_from_db:
                 fallback_rates = {rate['currency']: Decimal(str(rate['rate_to_try'])) for rate in rates_from_db}
-                logger.info(f"Using fallback rates from database: {fallback_rates}")
+                # Check if DB rates are not too old (max 24 hours)
+                if rates_from_db[0].get('updated_at'):
+                    last_db_update = rates_from_db[0]['updated_at']
+                    if isinstance(last_db_update, str):
+                        last_db_update = datetime.fromisoformat(last_db_update.replace('Z', '+00:00'))
+                    
+                    age_hours = (datetime.now(timezone.utc) - last_db_update).total_seconds() / 3600
+                    if age_hours <= 24:  # Use DB rates if less than 24 hours old
+                        logger.info(f"Using database fallback rates (age: {age_hours:.1f} hours): {fallback_rates}")
+                        return fallback_rates
+                
+                logger.info(f"Using database fallback rates (old but available): {fallback_rates}")
                 return fallback_rates
-            
-            # Default rates as final fallback
-            logger.warning("Using default fallback exchange rates")
-            return {
-                'USD': Decimal('27.5'),
-                'EUR': Decimal('30.0'),
-                'TRY': Decimal('1'),
-                'GBP': Decimal('35.0')
-            }
+                
+        except Exception as e:
+            logger.error(f"Failed to get rates from database: {e}")
+        
+        # Use cached rates if available
+        if self.rates_cache:
+            logger.info(f"Using cached fallback rates: {self.rates_cache}")
+            return self.rates_cache
+        
+        # Final default rates
+        default_rates = {
+            'USD': Decimal('27.5'),
+            'EUR': Decimal('30.0'), 
+            'TRY': Decimal('1'),
+            'GBP': Decimal('35.0')
+        }
+        logger.warning(f"Using default fallback exchange rates: {default_rates}")
+        return default_rates
     
     async def convert_to_try(self, amount: Decimal, from_currency: str) -> Decimal:
         """Convert amount to Turkish Lira"""
