@@ -429,7 +429,7 @@ print_status "CloudFlare tunnel service created"
 # Setup cron jobs
 print_info "Setting up cron jobs..."
 (crontab -u pi -l 2>/dev/null; echo "0 4 * * * sudo systemctl restart karavan-backend karavan-frontend") | crontab -u pi -
-(crontab -u pi -l 2>/dev/null; echo "0 */2 * * * curl -X POST http://localhost/api/exchange-rates/update >/dev/null 2>&1") | crontab -u pi -
+(crontab -u pi -l 2>/dev/null; echo "0 */2 * * * curl -X POST http://localhost:7000/api/exchange-rates/update >/dev/null 2>&1") | crontab -u pi -
 print_status "Cron jobs configured"
 
 # System optimizations for Raspberry Pi
