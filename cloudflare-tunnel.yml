@@ -1,0 +1,67 @@
+# CloudFlare Tunnel Configuration for Raspberry Pi
+# Save as: /home/pi/.cloudflared/config.yml
+
+tunnel: f36c1dc8-93cd-4739-8989-1cc52692c61f
+credentials-file: /home/pi/.cloudflared/f36c1dc8-93cd-4739-8989-1cc52692c61f.json
+
+# Ingress rules - CRITICAL for currency API stability
+ingress:
+  # Exchange Rates API - Special handling to prevent caching
+  - hostname: your-domain.com
+    path: /api/exchange-rates*
+    service: http://localhost:80
+    originRequest:
+      # Force no caching for currency endpoints
+      noTLSVerify: false
+      connectTimeout: 90s
+      tlsTimeout: 90s
+      tcpKeepAlive: 90s
+      keepAliveTimeout: 90s
+      keepAliveConnections: 10
+      httpHostHeader: localhost
+      # Critical headers to prevent caching
+      headers:
+        Cache-Control: "no-cache, no-store, must-revalidate, private"
+        Pragma: "no-cache"
+        Expires: "-1"
+  
+  # API endpoints
+  - hostname: your-domain.com
+    path: /api/*
+    service: http://localhost:80
+    originRequest:
+      connectTimeout: 60s
+      tlsTimeout: 60s
+      tcpKeepAlive: 60s
+      keepAliveTimeout: 60s
+      keepAliveConnections: 10
+      httpHostHeader: localhost
+      headers:
+        Cache-Control: "no-cache, no-store, must-revalidate"
+        Pragma: "no-cache"
+  
+  # Frontend and other routes
+  - hostname: your-domain.com
+    service: http://localhost:80
+    originRequest:
+      connectTimeout: 30s
+      tlsTimeout: 30s
+      tcpKeepAlive: 30s
+      keepAliveTimeout: 30s
+      keepAliveConnections: 10
+      httpHostHeader: localhost
+
+  # Catch-all rule
+  - service: http_status:404
+
+# Raspberry Pi optimizations
+retries: 3
+retry-interval: 5s
+grace-period: 30s
+
+# Logging for debugging
+loglevel: info
+logfile: /var/log/cloudflared.log
+
+# Metrics (optional)
+metrics: 0.0.0.0:8081
