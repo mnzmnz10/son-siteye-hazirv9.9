@@ -129,8 +129,35 @@ async def create_indexes():
         logger.error(f"Error creating indexes: {e}")
         # Don't fail startup if indexes can't be created
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application lifespan management for Raspberry Pi stability"""
+    logger.info("Starting application with Raspberry Pi optimizations...")
+    
+    # Start background scheduler for exchange rate updates
+    background_scheduler.start()
+    
+    # Preload initial exchange rates
+    try:
+        await currency_service.get_exchange_rates()
+        logger.info("Initial exchange rates loaded successfully")
+    except Exception as e:
+        logger.warning(f"Could not load initial exchange rates: {e}")
+    
+    # Initialize database indexes and create default categories
+    await create_indexes()
+    await create_supplies_category()
+    await create_default_admin()
+    logger.info("Application startup completed")
+    yield
+    
+    # Cleanup on shutdown
+    logger.info("Shutting down application...")
+    background_scheduler.stop()
+    logger.info("Application shutdown completed")
+
 # Create the main app
-app = FastAPI(title="Karavan Elektrik Ekipmanları Fiyat Karşılaştırma API")
+app = FastAPI(title="Karavan Elektrik Ekipmanları Fiyat Karşılaştırma API", lifespan=lifespan)
 
 # Initialize Sarf Malzemeleri Category
 async def create_supplies_category():
