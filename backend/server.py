@@ -688,6 +688,53 @@ class CurrencyService:
         else:
             return amount_try
 
+# Background task scheduler for Raspberry Pi stability
+class BackgroundScheduler:
+    def __init__(self):
+        self.running = False
+        self.thread = None
+    
+    def start(self):
+        """Start background scheduler for Raspberry Pi"""
+        if not self.running:
+            self.running = True
+            self.thread = threading.Thread(target=self._run_scheduler, daemon=True)
+            self.thread.start()
+            logger.info("Background scheduler started for Raspberry Pi stability")
+    
+    def stop(self):
+        """Stop background scheduler"""
+        self.running = False
+        if self.thread:
+            self.thread.join()
+            logger.info("Background scheduler stopped")
+    
+    def _run_scheduler(self):
+        """Background scheduler loop"""
+        import time
+        while self.running:
+            try:
+                # Update exchange rates every 30 minutes
+                asyncio.run_coroutine_threadsafe(
+                    currency_service.get_exchange_rates(), 
+                    asyncio.get_event_loop()
+                )
+                logger.info("Background exchange rate update completed")
+                
+                # Sleep for 30 minutes
+                for _ in range(1800):  # 30 minutes = 1800 seconds
+                    if not self.running:
+                        break
+                    time.sleep(1)
+                        
+            except Exception as e:
+                logger.error(f"Background scheduler error: {e}")
+                time.sleep(300)  # Wait 5 minutes on error
+
+# Initialize background scheduler
+background_scheduler = BackgroundScheduler()
+
+# Initialize currency service
 currency_service = CurrencyService()
 
 # Authentication Service
