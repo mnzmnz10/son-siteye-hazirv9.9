@@ -80,8 +80,8 @@ cat > $APP_DIR/scripts/exchange-monitor.sh << 'EOF'
 # Exchange Rate Monitor Script for Raspberry Pi
 
 LOG_FILE="/home/pi/karavan-app/logs/exchange-monitor.log"
-API_URL="http://localhost/api/exchange-rates"
-UPDATE_URL="http://localhost/api/exchange-rates/update"
+API_URL="http://localhost:7000/api/exchange-rates"
+UPDATE_URL="http://localhost:7000/api/exchange-rates/update"
 
 # Function to log with timestamp
 log_message() {
