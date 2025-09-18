@@ -229,8 +229,9 @@ sudo systemctl restart karavan-backend karavan-frontend
 - [ ] Pi boots and all services start automatically
 - [ ] Backend API responds at http://localhost:8001/api/
 - [ ] Frontend loads at http://localhost:3000/
-- [ ] Nginx serves both at http://localhost/
-- [ ] CloudFlare tunnel works at https://your-domain.com/
+- [ ] Nginx serves both at http://localhost:7000/
+- [ ] CloudFlare tunnel works at https://corlukaravan.shop/
+- [ ] WWW subdomain works at https://www.corlukaravan.shop/
 - [ ] Exchange rates API returns fresh data (no caching)
 - [ ] Exchange rate monitor logs show regular checks
 - [ ] Red X buttons work in package management
