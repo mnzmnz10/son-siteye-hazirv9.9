@@ -1,15 +1,15 @@
-# CloudFlare Tunnel Configuration for Raspberry Pi
+# CloudFlare Tunnel Configuration for Raspberry Pi - corlukaravan.shop
 # Save as: /home/pi/.cloudflared/config.yml
 
 tunnel: f36c1dc8-93cd-4739-8989-1cc52692c61f
 credentials-file: /home/pi/.cloudflared/f36c1dc8-93cd-4739-8989-1cc52692c61f.json
 
-# Ingress rules - CRITICAL for currency API stability
+# Ingress rules - CRITICAL for currency API stability on corlukaravan.shop
 ingress:
   # Exchange Rates API - Special handling to prevent caching
-  - hostname: your-domain.com
+  - hostname: corlukaravan.shop
     path: /api/exchange-rates*
-    service: http://localhost:80
+    service: http://localhost:7000
     originRequest:
       # Force no caching for currency endpoints
       noTLSVerify: false
@@ -18,38 +18,47 @@ ingress:
       tcpKeepAlive: 90s
       keepAliveTimeout: 90s
       keepAliveConnections: 10
-      httpHostHeader: localhost
+      httpHostHeader: corlukaravan.shop
       # Critical headers to prevent caching
       headers:
         Cache-Control: "no-cache, no-store, must-revalidate, private"
         Pragma: "no-cache"
         Expires: "-1"
+        X-Domain: "corlukaravan.shop"
+        X-Port: "7000"
   
   # API endpoints
-  - hostname: your-domain.com
+  - hostname: corlukaravan.shop
     path: /api/*
-    service: http://localhost:80
+    service: http://localhost:7000
     originRequest:
       connectTimeout: 60s
       tlsTimeout: 60s
       tcpKeepAlive: 60s
       keepAliveTimeout: 60s
       keepAliveConnections: 10
-      httpHostHeader: localhost
+      httpHostHeader: corlukaravan.shop
       headers:
         Cache-Control: "no-cache, no-store, must-revalidate"
         Pragma: "no-cache"
+        X-Domain: "corlukaravan.shop"
   
   # Frontend and other routes
-  - hostname: your-domain.com
-    service: http://localhost:80
+  - hostname: corlukaravan.shop
+    service: http://localhost:7000
     originRequest:
       connectTimeout: 30s
       tlsTimeout: 30s
       tcpKeepAlive: 30s
       keepAliveTimeout: 30s
       keepAliveConnections: 10
-      httpHostHeader: localhost
+      httpHostHeader: corlukaravan.shop
+
+  # WWW redirect (optional)
+  - hostname: www.corlukaravan.shop
+    service: http://localhost:7000
+    originRequest:
+      httpHostHeader: corlukaravan.shop
 
   # Catch-all rule
   - service: http_status:404
