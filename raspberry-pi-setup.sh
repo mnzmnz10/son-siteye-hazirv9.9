@@ -362,9 +362,9 @@ tunnel: f36c1dc8-93cd-4739-8989-1cc52692c61f
 credentials-file: /home/pi/.cloudflared/f36c1dc8-93cd-4739-8989-1cc52692c61f.json
 
 ingress:
-  - hostname: your-domain.com
+  - hostname: corlukaravan.shop
     path: /api/exchange-rates*
-    service: http://localhost:80
+    service: http://localhost:7000
     originRequest:
       connectTimeout: 90s
       tlsTimeout: 90s
@@ -372,18 +372,23 @@ ingress:
         Cache-Control: "no-cache, no-store, must-revalidate, private"
         Pragma: "no-cache"
         Expires: "-1"
+        X-Domain: "corlukaravan.shop"
   
-  - hostname: your-domain.com
+  - hostname: corlukaravan.shop
     path: /api/*
-    service: http://localhost:80
+    service: http://localhost:7000
     originRequest:
       connectTimeout: 60s
       headers:
         Cache-Control: "no-cache, no-store, must-revalidate"
         Pragma: "no-cache"
+        X-Domain: "corlukaravan.shop"
   
-  - hostname: your-domain.com
-    service: http://localhost:80
+  - hostname: corlukaravan.shop
+    service: http://localhost:7000
+  
+  - hostname: www.corlukaravan.shop
+    service: http://localhost:7000
   
   - service: http_status:404
 
