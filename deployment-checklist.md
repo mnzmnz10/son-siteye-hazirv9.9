@@ -137,13 +137,16 @@ Settings: Same as above
 ### Test Exchange Rates API
 ```bash
 # Test from Pi locally:
-curl http://localhost/api/exchange-rates | jq
+curl http://localhost:7000/api/exchange-rates | jq
 
 # Test through CloudFlare tunnel:
-curl https://your-domain.com/api/exchange-rates | jq
+curl https://corlukaravan.shop/api/exchange-rates | jq
 
 # Test rate updates:
-curl -X POST https://your-domain.com/api/exchange-rates/update | jq
+curl -X POST https://corlukaravan.shop/api/exchange-rates/update | jq
+
+# Test www subdomain:
+curl https://www.corlukaravan.shop/api/exchange-rates | jq
 ```
 
 ### Monitor Logs
