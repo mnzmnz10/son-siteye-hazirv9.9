@@ -100,27 +100,34 @@ sudo systemctl status cloudflared
 ### DNS Settings
 ```bash
 # In CloudFlare DNS:
-1. Create CNAME record: your-domain.com -> [TUNNEL_ID].cfargotunnel.com
-2. Set Proxy to "Proxied" (orange cloud)
+1. Create CNAME record: corlukaravan.shop -> f36c1dc8-93cd-4739-8989-1cc52692c61f.cfargotunnel.com
+2. Create CNAME record: www.corlukaravan.shop -> f36c1dc8-93cd-4739-8989-1cc52692c61f.cfargotunnel.com
+3. Set Proxy to "Proxied" (orange cloud) for both records
 ```
 
 ### Page Rules (CRITICAL for Exchange Rates)
 ```bash
 # Create Page Rule in CloudFlare Dashboard:
-URL: your-domain.com/api/exchange-rates*
+URL: corlukaravan.shop/api/exchange-rates*
 Settings:
 - Cache Level: Bypass
 - Browser Cache TTL: Respect Existing Headers
 - Edge Cache TTL: 0 seconds
+
+# Create another Page Rule for www:
+URL: www.corlukaravan.shop/api/exchange-rates*
+Settings: Same as above
 ```
 
 ### CloudFlare Worker (OPTIONAL but RECOMMENDED)
 ```bash
-# Deploy cloudflare-worker.js to your domain
+# Deploy cloudflare-worker.js to corlukaravan.shop domain
 1. Go to CloudFlare Dashboard -> Workers
 2. Create new Worker
 3. Paste the code from cloudflare-worker.js
-4. Deploy to your domain routes: your-domain.com/api/exchange-rates*
+4. Deploy to routes: 
+   - corlukaravan.shop/api/exchange-rates*
+   - www.corlukaravan.shop/api/exchange-rates*
 ```
 
 ---
