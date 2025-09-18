@@ -247,7 +247,10 @@ sudo systemctl restart karavan-backend karavan-frontend
 sudo systemctl status karavan-backend karavan-frontend exchange-monitor cloudflared
 
 # Update exchange rates manually:
-curl -X POST http://localhost/api/exchange-rates/update
+curl -X POST http://localhost:7000/api/exchange-rates/update
+
+# Test public endpoint:
+curl https://corlukaravan.shop/api/exchange-rates
 
 # View logs:
 sudo journalctl -u karavan-backend --since "1 hour ago"
