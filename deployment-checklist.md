@@ -167,13 +167,14 @@ tail -f /home/pi/karavan-app/logs/exchange-monitor.log
 ### Verify No-Cache Headers
 ```bash
 # Check response headers:
-curl -I https://your-domain.com/api/exchange-rates
+curl -I https://corlukaravan.shop/api/exchange-rates
 
 # Should see:
 # Cache-Control: no-cache, no-store, must-revalidate, private
 # Pragma: no-cache
 # X-Timestamp: [timestamp]
-# X-No-Cache: LIVE-[timestamp]
+# X-No-Cache: CORLUKARAVAN-LIVE-[timestamp]
+# X-Domain: corlukaravan.shop
 ```
 
 ---
