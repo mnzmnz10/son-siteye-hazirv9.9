@@ -355,6 +355,7 @@ function App() {
         loadProducts(1, true),
         loadCategories(),
         loadCategoryGroups(),
+        loadCustomers(),
         loadExchangeRates(),
         fetchQuotes(),
         loadFavoriteProducts(),
