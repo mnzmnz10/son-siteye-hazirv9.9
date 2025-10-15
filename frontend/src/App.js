@@ -6169,6 +6169,109 @@ function App() {
         </DialogContent>
       </Dialog>
 
+      {/* Customer Modal */}
+      <Dialog open={showCustomerModal} onOpenChange={setShowCustomerModal}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              {editingCustomer ? 'Müşteri Düzenle' : 'Yeni Müşteri Ekle'}
+            </DialogTitle>
+            <DialogDescription>
+              Müşteri bilgilerini girin. İsim ve soyisim zorunludur.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                İsim <span className="text-red-500">*</span>
+              </label>
+              <Input
+                placeholder="Örn: Ahmet"
+                value={customerForm.name}
+                onChange={(e) => setCustomerForm({...customerForm, name: e.target.value})}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Soyisim <span className="text-red-500">*</span>
+              </label>
+              <Input
+                placeholder="Örn: Yılmaz"
+                value={customerForm.surname}
+                onChange={(e) => setCustomerForm({...customerForm, surname: e.target.value})}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Firma</label>
+              <Input
+                placeholder="Firma adı"
+                value={customerForm.company}
+                onChange={(e) => setCustomerForm({...customerForm, company: e.target.value})}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Telefon</label>
+              <Input
+                placeholder="0555 123 4567"
+                value={customerForm.phone}
+                onChange={(e) => setCustomerForm({...customerForm, phone: e.target.value})}
+              />
+            </div>
+
+            <div className="col-span-2">
+              <label className="block text-sm font-medium mb-1">E-posta</label>
+              <Input
+                type="email"
+                placeholder="ornek@email.com"
+                value={customerForm.email}
+                onChange={(e) => setCustomerForm({...customerForm, email: e.target.value})}
+              />
+            </div>
+
+            <div className="col-span-2">
+              <label className="block text-sm font-medium mb-1">Adres</label>
+              <Input
+                placeholder="Tam adres"
+                value={customerForm.address}
+                onChange={(e) => setCustomerForm({...customerForm, address: e.target.value})}
+              />
+            </div>
+
+            <div className="col-span-2">
+              <label className="block text-sm font-medium mb-1">Notlar</label>
+              <textarea
+                className="w-full min-h-[80px] px-3 py-2 border border-slate-300 rounded-md"
+                placeholder="Müşteri hakkında notlar..."
+                value={customerForm.notes}
+                onChange={(e) => setCustomerForm({...customerForm, notes: e.target.value})}
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowCustomerModal(false);
+                setEditingCustomer(null);
+                resetCustomerForm();
+              }}
+            >
+              İptal
+            </Button>
+            <Button
+              onClick={editingCustomer ? updateCustomer : createCustomer}
+            >
+              {editingCustomer ? 'Güncelle' : 'Ekle'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Toast Notifications */}
       <Toaster />
     </div>
