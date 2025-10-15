@@ -511,6 +511,7 @@ class PackageSupplyCreate(BaseModel):
 class QuoteResponse(BaseModel):
     id: str
     name: str
+    customer_id: Optional[str] = None  # Müşteri ID'si (yeni)
     customer_name: Optional[str] = None
     customer_email: Optional[str] = None
     discount_percentage: float
