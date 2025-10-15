@@ -399,6 +399,20 @@ function App() {
     filterQuotes(quoteSearchTerm);
   }, [quotes]);
 
+  // Müşteri seçildiğinde teklif adını otomatik oluştur
+  useEffect(() => {
+    if (selectedQuoteCustomer && !loadedQuote) {
+      const selectedCustomer = customers.find(c => c.id === selectedQuoteCustomer);
+      if (selectedCustomer) {
+        const customerName = `${selectedCustomer.name} ${selectedCustomer.surname}`;
+        const date = new Date().toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        setQuoteName(`${customerName} - Teklif - ${date}`);
+      }
+    } else if (!selectedQuoteCustomer && !loadedQuote) {
+      setQuoteName('');
+    }
+  }, [selectedQuoteCustomer, customers, loadedQuote]);
+
   const fetchQuotes = async () => {
     try {
       const response = await fetch(`${API}/quotes`);
