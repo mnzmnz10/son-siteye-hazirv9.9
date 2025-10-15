@@ -117,6 +117,17 @@ async def create_indexes():
         await db.package_products.create_index([("package_id", 1), ("product_id", 1)])  # For efficient lookups
         await db.package_products.create_index([("package_id", 1), ("quantity", -1)])  # For quantity-based queries
         
+        # Customers collection indexes - PERFORMANCE ENHANCED
+        await db.customers.create_index("name")
+        await db.customers.create_index("surname")
+        await db.customers.create_index([("name", 1), ("surname", 1)])  # For full name search
+        await db.customers.create_index("company")
+        await db.customers.create_index("email")
+        await db.customers.create_index("phone")
+        await db.customers.create_index("is_favorite")
+        await db.customers.create_index("created_at")
+        await db.customers.create_index([("is_favorite", -1), ("name", 1)])  # For favorites-first sorting
+        
         logger.info("PERFORMANCE: Database indexes created successfully")
         
     except Exception as e:
