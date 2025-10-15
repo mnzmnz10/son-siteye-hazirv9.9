@@ -6734,6 +6734,109 @@ function App() {
         </DialogContent>
       </Dialog>
 
+      {/* Toplu Fiyat Güncelleme Modal */}
+      <Dialog open={showBulkPriceModal} onOpenChange={setShowBulkPriceModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Toplu Fiyat Güncelleme</DialogTitle>
+            <DialogDescription>
+              {selectedProductsForBulk.size} ürünün fiyatını güncelleyin
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Fiyat Türü</label>
+              <select
+                value={bulkPriceApplyTo}
+                onChange={(e) => setBulkPriceApplyTo(e.target.value)}
+                className="w-full px-3 py-2 border rounded-md"
+              >
+                <option value="list_price">Liste Fiyatı</option>
+                <option value="discounted_price">İndirimli Fiyat</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Değişiklik Tipi</label>
+              <select
+                value={bulkPriceChangeType}
+                onChange={(e) => setBulkPriceChangeType(e.target.value)}
+                className="w-full px-3 py-2 border rounded-md"
+              >
+                <option value="percentage">Yüzde (%)</option>
+                <option value="fixed">Sabit Miktar</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Değer {bulkPriceChangeType === 'percentage' ? '(%)' : '(₺)'}
+              </label>
+              <Input
+                type="number"
+                step="0.01"
+                value={bulkPriceChangeValue}
+                onChange={(e) => setBulkPriceChangeValue(e.target.value)}
+                placeholder={bulkPriceChangeType === 'percentage' ? 'Örn: 10' : 'Örn: 50'}
+              />
+              <p className="text-xs text-slate-500 mt-1">
+                {bulkPriceChangeType === 'percentage' 
+                  ? `${bulkPriceChangeValue > 0 ? '+' : ''}${bulkPriceChangeValue}% değişiklik uygulanacak`
+                  : `${bulkPriceChangeValue > 0 ? '+' : ''}${bulkPriceChangeValue}₺ eklenecek/çıkarılacak`
+                }
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowBulkPriceModal(false)}>
+              İptal
+            </Button>
+            <Button onClick={bulkUpdatePrice} className="bg-orange-600 hover:bg-orange-700">
+              Güncelle
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Toplu Kategori Atama Modal */}
+      <Dialog open={showBulkCategoryModal} onOpenChange={setShowBulkCategoryModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Toplu Kategori Atama</DialogTitle>
+            <DialogDescription>
+              {selectedProductsForBulk.size} ürüne kategori atayın
+            </DialogDescription>
+          </DialogHeader>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Kategori</label>
+            <select
+              value={bulkCategoryId}
+              onChange={(e) => setBulkCategoryId(e.target.value)}
+              className="w-full px-3 py-2 border rounded-md"
+            >
+              <option value="">Kategori seçin</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowBulkCategoryModal(false)}>
+              İptal
+            </Button>
+            <Button onClick={bulkUpdateCategory} className="bg-purple-600 hover:bg-purple-700">
+              Ata
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Toast Notifications */}
       <Toaster />
     </div>
