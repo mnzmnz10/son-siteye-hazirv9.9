@@ -1131,6 +1131,81 @@ function App() {
     setSelectedQuoteCustomer(''); // Seçili müşteriyi de temizle
   };
 
+  // Teklifi kaydet (PDF indirmeden)
+  const saveQuote = async () => {
+    try {
+      if (selectedProducts.size === 0) {
+        toast.error('Lütfen en az bir ürün seçin');
+        return;
+      }
+
+      const selectedProductData = getSelectedProductsData().map(p => ({
+        id: p.id,
+        quantity: p.quantity || 1
+      }));
+
+      // Eğer mevcut bir teklif yüklenmişse ve isim değişmemişse onu güncelle
+      if (loadedQuote && loadedQuote.id && 
+          (loadedQuote.name === quoteName || quoteName === '')) {
+        
+        const updateResponse = await fetch(`${API}/quotes/${loadedQuote.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: loadedQuote.name,
+            customer_id: selectedQuoteCustomer || null,
+            labor_cost: parseFloat(quoteLaborCost) || 0,
+            discount_percentage: parseFloat(quoteDiscount) || 0,
+            products: selectedProductData,
+            notes: quoteLaborCost > 0 ? `İşçilik maliyeti: ₺${formatPrice(quoteLaborCost)}` : null
+          })
+        });
+        
+        if (!updateResponse.ok) {
+          throw new Error('Teklif güncellenemedi');
+        }
+        
+        await fetchQuotes();
+        toast.success(`"${loadedQuote.name}" teklifi güncellendi!`);
+        
+      } else {
+        // Yeni teklif oluştur
+        const newQuoteData = {
+          name: quoteName || `Teklif - ${new Date().toLocaleDateString('tr-TR')}`,
+          customer_id: selectedQuoteCustomer || null,
+          discount_percentage: parseFloat(quoteDiscount) || 0,
+          labor_cost: parseFloat(quoteLaborCost) || 0,
+          products: selectedProductData,
+          notes: quoteLaborCost > 0 ? `İşçilik maliyeti: ₺${formatPrice(quoteLaborCost)}` : null
+        };
+        
+        const createResponse = await fetch(`${API}/quotes`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(newQuoteData)
+        });
+        
+        if (!createResponse.ok) {
+          throw new Error('Teklif oluşturulamadı');
+        }
+        
+        const savedQuote = await createResponse.json();
+        setLoadedQuote(savedQuote); // Kaydedilen teklifi yüklenmiş olarak işaretle
+        
+        await fetchQuotes();
+        toast.success('Teklif başarıyla kaydedildi!');
+      }
+      
+    } catch (error) {
+      console.error('Teklif kaydetme hatası:', error);
+      toast.error('Teklif kaydedilemedi: ' + error.message);
+    }
+  };
+
   // Kategorisi olmayan ürünleri getir
   const getUncategorizedProducts = () => {
     return products.filter(product => !product.category_id || product.category_id === 'none');
