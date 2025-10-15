@@ -4680,6 +4680,7 @@ function App() {
                                     >
                                       <TableCell>
                                         <div className="flex items-center gap-2">
+                                          {/* Teklif için checkbox */}
                                           <input
                                             type="checkbox"
                                             className="rounded border-gray-300"
@@ -4691,6 +4692,7 @@ function App() {
                                                 toggleProductSelection(product.id, 0);
                                               }
                                             }}
+                                            title="Teklif için seç"
                                           />
                                           {selectedProducts.has(product.id) && (
                                             <input
@@ -4705,6 +4707,14 @@ function App() {
                                               placeholder="1"
                                             />
                                           )}
+                                          {/* Toplu işlem için checkbox */}
+                                          <input
+                                            type="checkbox"
+                                            className="rounded border-blue-500 text-blue-600"
+                                            checked={selectedProductsForBulk.has(product.id)}
+                                            onChange={() => toggleProductSelection(product.id)}
+                                            title="Toplu işlem için seç"
+                                          />
                                         </div>
                                       </TableCell>
                                       <TableCell className="font-medium">
