@@ -6314,6 +6314,105 @@ function App() {
         </DialogContent>
       </Dialog>
 
+      {/* Hızlı Müşteri Ekleme Modal (Teklif Ekranından) */}
+      <Dialog open={showQuickCustomerModal} onOpenChange={setShowQuickCustomerModal}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Hızlı Müşteri Ekle</DialogTitle>
+            <DialogDescription>
+              Teklif için yeni müşteri ekleyin. İsim ve soyisim zorunludur.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                İsim <span className="text-red-500">*</span>
+              </label>
+              <Input
+                placeholder="Örn: Ahmet"
+                value={customerForm.name}
+                onChange={(e) => setCustomerForm({...customerForm, name: e.target.value})}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Soyisim <span className="text-red-500">*</span>
+              </label>
+              <Input
+                placeholder="Örn: Yılmaz"
+                value={customerForm.surname}
+                onChange={(e) => setCustomerForm({...customerForm, surname: e.target.value})}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Firma</label>
+              <Input
+                placeholder="Firma adı"
+                value={customerForm.company}
+                onChange={(e) => setCustomerForm({...customerForm, company: e.target.value})}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Telefon</label>
+              <Input
+                placeholder="0555 123 4567"
+                value={customerForm.phone}
+                onChange={(e) => setCustomerForm({...customerForm, phone: e.target.value})}
+              />
+            </div>
+
+            <div className="col-span-2">
+              <label className="block text-sm font-medium mb-1">E-posta</label>
+              <Input
+                type="email"
+                placeholder="ornek@email.com"
+                value={customerForm.email}
+                onChange={(e) => setCustomerForm({...customerForm, email: e.target.value})}
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowQuickCustomerModal(false);
+                resetCustomerForm();
+              }}
+            >
+              İptal
+            </Button>
+            <Button
+              onClick={async () => {
+                if (!customerForm.name.trim() || !customerForm.surname.trim()) {
+                  toast.error('İsim ve soyisim zorunludur');
+                  return;
+                }
+
+                try {
+                  const response = await axios.post(`${API}/customers`, customerForm);
+                  toast.success('Müşteri eklendi');
+                  setShowQuickCustomerModal(false);
+                  resetCustomerForm();
+                  await loadCustomers();
+                  // Yeni eklenen müşteriyi otomatik seç
+                  setSelectedQuoteCustomer(response.data.id);
+                } catch (error) {
+                  console.error('Error creating customer:', error);
+                  toast.error('Müşteri eklenemedi');
+                }
+              }}
+            >
+              Ekle ve Seç
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Toast Notifications */}
       <Toaster />
     </div>
