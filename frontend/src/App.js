@@ -835,6 +835,8 @@ function App() {
       
       if (response.data.success) {
         toast.success('Kategori sıralaması güncellendi');
+        // CRITICAL: Cache'i temizle
+        CacheManager.remove('categories');
         await loadCategories(); // Kategorileri yeniden yükle
       }
     } catch (error) {
