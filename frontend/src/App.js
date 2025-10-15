@@ -1114,6 +1114,7 @@ function App() {
     setQuoteNotes(''); // Teklif notlarını da temizle
     setLoadedQuote(null); // Yüklenen teklifi de temizle
     setQuoteName(''); // Teklif adını da temizle
+    setSelectedQuoteCustomer(''); // Seçili müşteriyi de temizle
   };
 
   // Kategorisi olmayan ürünleri getir
