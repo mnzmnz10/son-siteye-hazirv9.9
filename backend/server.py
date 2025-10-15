@@ -346,6 +346,40 @@ class CategoryGroupUpdate(BaseModel):
     category_ids: Optional[List[str]] = None
     sort_order: Optional[int] = None  # Sıralama güncellemesi için
 
+# Customer Models
+class Customer(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str  # İsim (zorunlu)
+    surname: str  # Soyisim (zorunlu)
+    company: Optional[str] = None  # Firma adı (opsiyonel)
+    phone: Optional[str] = None  # Telefon (opsiyonel)
+    email: Optional[str] = None  # E-posta (opsiyonel)
+    address: Optional[str] = None  # Adres (opsiyonel)
+    notes: Optional[str] = None  # Notlar (opsiyonel)
+    is_favorite: bool = False  # Favori müşteri
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: Optional[datetime] = None
+
+class CustomerCreate(BaseModel):
+    name: str  # İsim (zorunlu)
+    surname: str  # Soyisim (zorunlu)
+    company: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    address: Optional[str] = None
+    notes: Optional[str] = None
+    is_favorite: bool = False
+
+class CustomerUpdate(BaseModel):
+    name: Optional[str] = None
+    surname: Optional[str] = None
+    company: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    address: Optional[str] = None
+    notes: Optional[str] = None
+    is_favorite: Optional[bool] = None
+
 # Upload History Models
 class UploadHistory(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
