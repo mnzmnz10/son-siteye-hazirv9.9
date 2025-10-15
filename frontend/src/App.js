@@ -5126,6 +5126,18 @@ function App() {
 
                     {/* Action Buttons - Yeni Tasarım */}
                     <div className="flex gap-3">
+                      {/* Teklifi Kaydet Butonu */}
+                      <Button 
+                        onClick={saveQuote}
+                        disabled={selectedProducts.size === 0}
+                        className="bg-blue-600 hover:bg-blue-700"
+                      >
+                        <Save className="w-4 h-4 mr-2" />
+                        {loadedQuote && (loadedQuote.name === quoteName || quoteName === '') 
+                          ? 'Teklifi Güncelle' 
+                          : 'Teklifi Kaydet'}
+                      </Button>
+
                       {/* Ana PDF İndirme Butonu */}
                       <Button 
                         onClick={async () => {
