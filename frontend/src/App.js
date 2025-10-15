@@ -126,6 +126,15 @@ function App() {
   const [quoteSearchTerm, setQuoteSearchTerm] = useState('');
   const [filteredQuotes, setFilteredQuotes] = useState([]);
   
+  // Toplu işlemler için state'ler
+  const [selectedProductsForBulk, setSelectedProductsForBulk] = useState(new Set());
+  const [showBulkPriceModal, setShowBulkPriceModal] = useState(false);
+  const [showBulkCategoryModal, setShowBulkCategoryModal] = useState(false);
+  const [bulkPriceChangeType, setBulkPriceChangeType] = useState('percentage'); // percentage or fixed
+  const [bulkPriceChangeValue, setBulkPriceChangeValue] = useState(0);
+  const [bulkPriceApplyTo, setBulkPriceApplyTo] = useState('list_price'); // list_price or discounted_price
+  const [bulkCategoryId, setBulkCategoryId] = useState('');
+  
   // Upload History için state'ler
   const [showUploadHistoryDialog, setShowUploadHistoryDialog] = useState(false);
   const [selectedCompanyForHistory, setSelectedCompanyForHistory] = useState(null);
