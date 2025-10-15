@@ -1769,6 +1769,190 @@ async def delete_company(company_id: str):
         logger.error(f"Error deleting company: {e}")
         raise HTTPException(status_code=500, detail="Firma silinemedi")
 
+# ===========================
+# CUSTOMER ENDPOINTS
+# ===========================
+
+@api_router.post("/customers", response_model=Customer)
+async def create_customer(customer: CustomerCreate):
+    """Create a new customer"""
+    try:
+        customer_dict = customer.dict()
+        customer_dict["id"] = str(uuid.uuid4())
+        customer_dict["created_at"] = datetime.now(timezone.utc)
+        customer_dict["updated_at"] = None
+        
+        await db.customers.insert_one(customer_dict)
+        
+        return Customer(**customer_dict)
+    except Exception as e:
+        logger.error(f"Error creating customer: {e}")
+        raise HTTPException(status_code=500, detail="Müşteri oluşturulamadı")
+
+@api_router.get("/customers", response_model=List[Customer])
+async def get_customers(
+    is_favorite: Optional[bool] = None,
+    search: Optional[str] = None
+):
+    """Get all customers with optional filtering"""
+    try:
+        query = {}
+        
+        if is_favorite is not None:
+            query["is_favorite"] = is_favorite
+        
+        if search:
+            # Search in name, surname, company, email, phone
+            search_regex = {"$regex": search, "$options": "i"}
+            query["$or"] = [
+                {"name": search_regex},
+                {"surname": search_regex},
+                {"company": search_regex},
+                {"email": search_regex},
+                {"phone": search_regex}
+            ]
+        
+        # Sort: favorites first, then by name
+        customers = await db.customers.find(query).sort([("is_favorite", -1), ("name", 1), ("surname", 1)]).to_list(None)
+        
+        return [Customer(**customer) for customer in customers]
+    except Exception as e:
+        logger.error(f"Error getting customers: {e}")
+        raise HTTPException(status_code=500, detail="Müşteriler getirilemedi")
+
+@api_router.get("/customers/{customer_id}", response_model=Customer)
+async def get_customer(customer_id: str):
+    """Get a single customer by ID"""
+    try:
+        customer = await db.customers.find_one({"id": customer_id})
+        if not customer:
+            raise HTTPException(status_code=404, detail="Müşteri bulunamadı")
+        
+        return Customer(**customer)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting customer: {e}")
+        raise HTTPException(status_code=500, detail="Müşteri getirilemedi")
+
+@api_router.put("/customers/{customer_id}", response_model=Customer)
+async def update_customer(customer_id: str, customer_update: CustomerUpdate):
+    """Update a customer"""
+    try:
+        # Get existing customer
+        existing_customer = await db.customers.find_one({"id": customer_id})
+        if not existing_customer:
+            raise HTTPException(status_code=404, detail="Müşteri bulunamadı")
+        
+        # Prepare update data
+        update_dict = {}
+        if customer_update.name is not None:
+            update_dict["name"] = customer_update.name
+        if customer_update.surname is not None:
+            update_dict["surname"] = customer_update.surname
+        if customer_update.company is not None:
+            update_dict["company"] = customer_update.company
+        if customer_update.phone is not None:
+            update_dict["phone"] = customer_update.phone
+        if customer_update.email is not None:
+            update_dict["email"] = customer_update.email
+        if customer_update.address is not None:
+            update_dict["address"] = customer_update.address
+        if customer_update.notes is not None:
+            update_dict["notes"] = customer_update.notes
+        if customer_update.is_favorite is not None:
+            update_dict["is_favorite"] = customer_update.is_favorite
+        
+        if not update_dict:
+            raise HTTPException(status_code=400, detail="Güncellenecek veri bulunamadı")
+        
+        # Add updated timestamp
+        update_dict["updated_at"] = datetime.now(timezone.utc)
+        
+        # Update customer
+        await db.customers.update_one(
+            {"id": customer_id},
+            {"$set": update_dict}
+        )
+        
+        # Get updated customer
+        updated_customer = await db.customers.find_one({"id": customer_id})
+        
+        return Customer(**updated_customer)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating customer: {e}")
+        raise HTTPException(status_code=500, detail="Müşteri güncellenemedi")
+
+@api_router.delete("/customers/{customer_id}")
+async def delete_customer(customer_id: str):
+    """Delete a customer"""
+    try:
+        result = await db.customers.delete_one({"id": customer_id})
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="Müşteri bulunamadı")
+        
+        return {"success": True, "message": "Müşteri silindi"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting customer: {e}")
+        raise HTTPException(status_code=500, detail="Müşteri silinemedi")
+
+@api_router.patch("/customers/{customer_id}/favorite")
+async def toggle_customer_favorite(customer_id: str):
+    """Toggle customer favorite status"""
+    try:
+        customer = await db.customers.find_one({"id": customer_id})
+        if not customer:
+            raise HTTPException(status_code=404, detail="Müşteri bulunamadı")
+        
+        new_favorite_status = not customer.get("is_favorite", False)
+        
+        await db.customers.update_one(
+            {"id": customer_id},
+            {"$set": {
+                "is_favorite": new_favorite_status,
+                "updated_at": datetime.now(timezone.utc)
+            }}
+        )
+        
+        return {
+            "success": True,
+            "is_favorite": new_favorite_status,
+            "message": "Favori silindi" if not new_favorite_status else "Favorilere eklendi"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error toggling customer favorite: {e}")
+        raise HTTPException(status_code=500, detail="Favori durumu güncellenemedi")
+
+@api_router.get("/customers/{customer_id}/quotes")
+async def get_customer_quotes(customer_id: str):
+    """Get all quotes for a specific customer"""
+    try:
+        # Verify customer exists
+        customer = await db.customers.find_one({"id": customer_id})
+        if not customer:
+            raise HTTPException(status_code=404, detail="Müşteri bulunamadı")
+        
+        # Get quotes for this customer
+        quotes = await db.quotes.find({"customer_id": customer_id}).sort("created_at", -1).to_list(None)
+        
+        return {
+            "success": True,
+            "customer": Customer(**customer).dict(),
+            "quotes": quotes,
+            "total_quotes": len(quotes)
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting customer quotes: {e}")
+        raise HTTPException(status_code=500, detail="Müşteri teklifleri getirilemedi")
+
 class ProductUpdate(BaseModel):
     name: Optional[str] = None
     brand: Optional[str] = None  # Marka alanı
