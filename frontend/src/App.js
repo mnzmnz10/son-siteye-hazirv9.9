@@ -508,6 +508,121 @@ function App() {
     }
   };
 
+  // ===========================
+  // CUSTOMER FUNCTIONS
+  // ===========================
+
+  const loadCustomers = async () => {
+    try {
+      const response = await axios.get(`${API}/customers`);
+      setCustomers(response.data);
+    } catch (error) {
+      console.error('Error loading customers:', error);
+      toast.error('Müşteriler yüklenemedi');
+    }
+  };
+
+  const createCustomer = async () => {
+    if (!customerForm.name.trim() || !customerForm.surname.trim()) {
+      toast.error('İsim ve soyisim zorunludur');
+      return;
+    }
+
+    try {
+      await axios.post(`${API}/customers`, customerForm);
+      toast.success('Müşteri eklendi');
+      setShowCustomerModal(false);
+      resetCustomerForm();
+      await loadCustomers();
+    } catch (error) {
+      console.error('Error creating customer:', error);
+      toast.error('Müşteri eklenemedi');
+    }
+  };
+
+  const updateCustomer = async () => {
+    if (!customerForm.name.trim() || !customerForm.surname.trim()) {
+      toast.error('İsim ve soyisim zorunludur');
+      return;
+    }
+
+    try {
+      await axios.put(`${API}/customers/${editingCustomer.id}`, customerForm);
+      toast.success('Müşteri güncellendi');
+      setShowCustomerModal(false);
+      setEditingCustomer(null);
+      resetCustomerForm();
+      await loadCustomers();
+    } catch (error) {
+      console.error('Error updating customer:', error);
+      toast.error('Müşteri güncellenemedi');
+    }
+  };
+
+  const deleteCustomer = async (customerId) => {
+    if (!window.confirm('Bu müşteriyi silmek istediğinizden emin misiniz?')) {
+      return;
+    }
+
+    try {
+      await axios.delete(`${API}/customers/${customerId}`);
+      toast.success('Müşteri silindi');
+      await loadCustomers();
+    } catch (error) {
+      console.error('Error deleting customer:', error);
+      toast.error('Müşteri silinemedi');
+    }
+  };
+
+  const toggleCustomerFavorite = async (customerId) => {
+    try {
+      const response = await axios.patch(`${API}/customers/${customerId}/favorite`);
+      toast.success(response.data.message);
+      await loadCustomers();
+    } catch (error) {
+      console.error('Error toggling customer favorite:', error);
+      toast.error('Favori durumu değiştirilemedi');
+    }
+  };
+
+  const startEditCustomer = (customer) => {
+    setEditingCustomer(customer);
+    setCustomerForm({
+      name: customer.name,
+      surname: customer.surname,
+      company: customer.company || '',
+      phone: customer.phone || '',
+      email: customer.email || '',
+      address: customer.address || '',
+      notes: customer.notes || ''
+    });
+    setShowCustomerModal(true);
+  };
+
+  const resetCustomerForm = () => {
+    setCustomerForm({
+      name: '',
+      surname: '',
+      company: '',
+      phone: '',
+      email: '',
+      address: '',
+      notes: ''
+    });
+  };
+
+  const filteredCustomers = customers.filter(customer => {
+    if (!customerSearchQuery) return true;
+    const searchLower = customerSearchQuery.toLowerCase();
+    return (
+      customer.name?.toLowerCase().includes(searchLower) ||
+      customer.surname?.toLowerCase().includes(searchLower) ||
+      customer.company?.toLowerCase().includes(searchLower) ||
+      customer.email?.toLowerCase().includes(searchLower) ||
+      customer.phone?.toLowerCase().includes(searchLower)
+    );
+  });
+
 
 
   const loadExchangeRates = async (forceUpdate = false, showToast = true) => {
