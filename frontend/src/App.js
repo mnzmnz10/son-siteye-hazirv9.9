@@ -4903,6 +4903,22 @@ function App() {
                       </div>
                     </div>
 
+                    {/* Teklif Adı Bölümü */}
+                    <div className="bg-gradient-to-br from-blue-50 to-indigo-100 border-2 border-blue-300 rounded-lg p-4 shadow-md">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center">
+                          <FileText className="w-3 h-3" />
+                        </div>
+                        <span className="font-medium text-blue-800">Teklif Adı</span>
+                      </div>
+                      <Input
+                        placeholder="Teklif adını girin (otomatik müşteri adı gelir)"
+                        value={quoteName}
+                        onChange={(e) => setQuoteName(e.target.value)}
+                        className="w-full"
+                      />
+                    </div>
+
                     {/* Müşteri Seçimi Bölümü */}
                     <div className="bg-gradient-to-br from-pink-50 to-purple-100 border-2 border-pink-300 rounded-lg p-4 shadow-md">
                       <div className="flex items-center justify-between mb-3">
