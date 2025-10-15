@@ -405,8 +405,7 @@ function App() {
       const selectedCustomer = customers.find(c => c.id === selectedQuoteCustomer);
       if (selectedCustomer) {
         const customerName = `${selectedCustomer.name} ${selectedCustomer.surname}`;
-        const date = new Date().toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-        setQuoteName(`${customerName} - Teklif - ${date}`);
+        setQuoteName(customerName);
       }
     } else if (!selectedQuoteCustomer && !loadedQuote) {
       setQuoteName('');
