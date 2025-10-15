@@ -4299,6 +4299,31 @@ function App() {
                     )}
                   </div>
                   <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={downloadTemplate}
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Şablon İndir
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={exportProducts}
+                    >
+                      <Upload className="w-4 h-4 mr-2" />
+                      Excel Export
+                    </Button>
+                    {selectedProductsForBulk.size === 0 ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={selectAllProducts}
+                      >
+                        Toplu Seç
+                      </Button>
+                    ) : null}
                     {selectedProducts.size > 0 && (
                       <>
                         <Button 
