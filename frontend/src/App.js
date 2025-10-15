@@ -5241,9 +5241,7 @@ function App() {
                         className="bg-green-600 hover:bg-green-700 flex-1"
                       >
                         <Download className="w-4 h-4 mr-2" />
-                        {loadedQuote && (loadedQuote.name === quoteName || quoteName === '') 
-                          ? (quoteLaborCost > 0 ? 'Güncelle & PDF İndir' : 'Güncelle & PDF İndir') 
-                          : (quoteLaborCost > 0 ? 'İşçilikli PDF İndir' : 'PDF İndir')}
+                        PDF İndir
                       </Button>
                       
                       {/* WhatsApp Paylaşım Butonu - Düzenleme Arayüzü */}
