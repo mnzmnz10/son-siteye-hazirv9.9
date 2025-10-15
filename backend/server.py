@@ -5046,6 +5046,265 @@ async def change_upload_currency(upload_id: str, new_currency: str):
         logger.error(f"Error changing upload currency: {e}")
         raise HTTPException(status_code=500, detail=f"Para birimi güncellenemedi: {str(e)}")
 
+# ===========================
+# EXCEL EXPORT & TEMPLATE ENDPOINTS
+# ===========================
+
+@api_router.get("/products/export/template")
+async def download_product_template():
+    """Download Excel template for product import"""
+    try:
+        # Create workbook and worksheet
+        workbook = openpyxl.Workbook()
+        sheet = workbook.active
+        sheet.title = "Ürünler"
+        
+        # Define headers
+        headers = [
+            "Ürün Adı*",
+            "Marka",
+            "Açıklama",
+            "Liste Fiyatı*",
+            "İndirimli Fiyat",
+            "Para Birimi* (USD/EUR/TRY/GBP)",
+            "Görsel URL",
+            "Stok Miktarı"
+        ]
+        
+        # Style header row
+        header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+        for col_num, header in enumerate(headers, 1):
+            cell = sheet.cell(row=1, column=col_num)
+            cell.value = header
+            cell.fill = header_fill
+            cell.font = openpyxl.styles.Font(bold=True, color="FFFFFF")
+        
+        # Add example row
+        example_data = [
+            "Güneş Paneli 100W",
+            "Apex",
+            "Monokristal güneş paneli",
+            "150.00",
+            "120.00",
+            "USD",
+            "https://example.com/panel.jpg",
+            "10"
+        ]
+        for col_num, value in enumerate(example_data, 1):
+            sheet.cell(row=2, column=col_num).value = value
+        
+        # Adjust column widths
+        for col_num in range(1, len(headers) + 1):
+            sheet.column_dimensions[openpyxl.utils.get_column_letter(col_num)].width = 20
+        
+        # Save to BytesIO
+        output = BytesIO()
+        workbook.save(output)
+        output.seek(0)
+        
+        return StreamingResponse(
+            output,
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={"Content-Disposition": "attachment; filename=urun_sablonu.xlsx"}
+        )
+        
+    except Exception as e:
+        logger.error(f"Error creating template: {e}")
+        raise HTTPException(status_code=500, detail="Şablon oluşturulamadı")
+
+@api_router.get("/products/export")
+async def export_products(
+    company_id: Optional[str] = None,
+    category_id: Optional[str] = None
+):
+    """Export products to Excel file"""
+    try:
+        # Build query
+        query = {}
+        if company_id:
+            query["company_id"] = company_id
+        if category_id:
+            query["category_id"] = category_id
+        
+        # Get products
+        products = await db.products.find(query).to_list(None)
+        
+        if not products:
+            raise HTTPException(status_code=404, detail="Dışa aktarılacak ürün bulunamadı")
+        
+        # Get companies and categories for lookup
+        companies = {c["id"]: c["name"] for c in await db.companies.find().to_list(None)}
+        categories = {c["id"]: c["name"] for c in await db.categories.find().to_list(None)}
+        
+        # Create workbook
+        workbook = openpyxl.Workbook()
+        sheet = workbook.active
+        sheet.title = "Ürünler"
+        
+        # Headers
+        headers = [
+            "Ürün Adı",
+            "Firma",
+            "Kategori",
+            "Marka",
+            "Açıklama",
+            "Liste Fiyatı",
+            "İndirimli Fiyat",
+            "Para Birimi",
+            "Liste Fiyatı (TL)",
+            "İndirimli Fiyat (TL)",
+            "Favori",
+            "Stok",
+            "Görsel URL",
+            "Oluşturulma Tarihi"
+        ]
+        
+        # Style header
+        header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+        for col_num, header in enumerate(headers, 1):
+            cell = sheet.cell(row=1, column=col_num)
+            cell.value = header
+            cell.fill = header_fill
+            cell.font = openpyxl.styles.Font(bold=True, color="FFFFFF")
+        
+        # Add product data
+        for row_num, product in enumerate(products, 2):
+            sheet.cell(row=row_num, column=1).value = product.get("name", "")
+            sheet.cell(row=row_num, column=2).value = companies.get(product.get("company_id", ""), "")
+            sheet.cell(row=row_num, column=3).value = categories.get(product.get("category_id", ""), "")
+            sheet.cell(row=row_num, column=4).value = product.get("brand", "")
+            sheet.cell(row=row_num, column=5).value = product.get("description", "")
+            sheet.cell(row=row_num, column=6).value = float(product.get("list_price", 0))
+            sheet.cell(row=row_num, column=7).value = float(product.get("discounted_price", 0)) if product.get("discounted_price") else ""
+            sheet.cell(row=row_num, column=8).value = product.get("currency", "")
+            sheet.cell(row=row_num, column=9).value = float(product.get("list_price_try", 0)) if product.get("list_price_try") else ""
+            sheet.cell(row=row_num, column=10).value = float(product.get("discounted_price_try", 0)) if product.get("discounted_price_try") else ""
+            sheet.cell(row=row_num, column=11).value = "Evet" if product.get("is_favorite") else "Hayır"
+            sheet.cell(row=row_num, column=12).value = product.get("stock_quantity", "")
+            sheet.cell(row=row_num, column=13).value = product.get("image_url", "")
+            sheet.cell(row=row_num, column=14).value = product.get("created_at", "").strftime("%d.%m.%Y %H:%M") if product.get("created_at") else ""
+        
+        # Adjust column widths
+        for col_num in range(1, len(headers) + 1):
+            sheet.column_dimensions[openpyxl.utils.get_column_letter(col_num)].width = 15
+        
+        # Save to BytesIO
+        output = BytesIO()
+        workbook.save(output)
+        output.seek(0)
+        
+        filename = f"urunler_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+        
+        return StreamingResponse(
+            output,
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error exporting products: {e}")
+        raise HTTPException(status_code=500, detail="Ürünler dışa aktarılamadı")
+
+@api_router.post("/products/bulk-update-price")
+async def bulk_update_price(
+    product_ids: List[str],
+    price_change_type: str,  # "percentage" or "fixed"
+    price_change_value: float,
+    apply_to: str = "list_price"  # "list_price" or "discounted_price"
+):
+    """Bulk update product prices"""
+    try:
+        if not product_ids:
+            raise HTTPException(status_code=400, detail="Ürün seçilmedi")
+        
+        updated_count = 0
+        
+        for product_id in product_ids:
+            product = await db.products.find_one({"id": product_id})
+            if not product:
+                continue
+            
+            update_data = {}
+            
+            # Get current price
+            current_price = float(product.get(apply_to, 0))
+            
+            # Calculate new price
+            if price_change_type == "percentage":
+                new_price = current_price * (1 + price_change_value / 100)
+            else:  # fixed
+                new_price = current_price + price_change_value
+            
+            # Ensure positive price
+            new_price = max(0, new_price)
+            
+            # Update price
+            update_data[apply_to] = new_price
+            
+            # Recalculate TRY prices
+            currency = product.get("currency", "USD")
+            rates = await currency_service.get_exchange_rates()
+            
+            if apply_to == "list_price":
+                update_data["list_price_try"] = await currency_service.convert_to_try(new_price, currency)
+            else:
+                update_data["discounted_price_try"] = await currency_service.convert_to_try(new_price, currency)
+            
+            await db.products.update_one(
+                {"id": product_id},
+                {"$set": update_data}
+            )
+            
+            updated_count += 1
+        
+        return {
+            "success": True,
+            "message": f"{updated_count} ürünün fiyatı güncellendi",
+            "updated_count": updated_count
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error bulk updating prices: {e}")
+        raise HTTPException(status_code=500, detail="Fiyatlar toplu güncellenemedi")
+
+@api_router.post("/products/bulk-update-category")
+async def bulk_update_category(
+    product_ids: List[str],
+    category_id: str
+):
+    """Bulk update product category"""
+    try:
+        if not product_ids:
+            raise HTTPException(status_code=400, detail="Ürün seçilmedi")
+        
+        # Verify category exists
+        if category_id:
+            category = await db.categories.find_one({"id": category_id})
+            if not category:
+                raise HTTPException(status_code=404, detail="Kategori bulunamadı")
+        
+        # Update products
+        result = await db.products.update_many(
+            {"id": {"$in": product_ids}},
+            {"$set": {"category_id": category_id if category_id else None}}
+        )
+        
+        return {
+            "success": True,
+            "message": f"{result.modified_count} ürünün kategorisi güncellendi",
+            "updated_count": result.modified_count
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error bulk updating category: {e}")
+        raise HTTPException(status_code=500, detail="Kategoriler toplu güncellenemedi")
+
 # Category Groups CRUD Operations
 @api_router.get("/category-groups")
 async def get_category_groups():
