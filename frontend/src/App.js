@@ -751,7 +751,7 @@ function App() {
     }
   };
 
-  const toggleProductSelection = (productId) => {
+  const toggleProductSelectionForBulk = (productId) => {
     const newSelection = new Set(selectedProductsForBulk);
     if (newSelection.has(productId)) {
       newSelection.delete(productId);
