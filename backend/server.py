@@ -488,8 +488,9 @@ class UploadHistoryResponse(BaseModel):
 
 class QuoteCreate(BaseModel):
     name: str
-    customer_name: Optional[str] = None
-    customer_email: Optional[str] = None
+    customer_id: Optional[str] = None  # Müşteri ID'si (yeni)
+    customer_name: Optional[str] = None  # Backward compatibility
+    customer_email: Optional[str] = None  # Backward compatibility
     discount_percentage: float = 0
     labor_cost: float = 0  # İşçilik maliyeti
     products: List[Dict[str, Any]]  # Product objects with ID and quantity
