@@ -4707,14 +4707,6 @@ function App() {
                                               placeholder="1"
                                             />
                                           )}
-                                          {/* Toplu işlem için checkbox */}
-                                          <input
-                                            type="checkbox"
-                                            className="rounded border-blue-500 text-blue-600"
-                                            checked={selectedProductsForBulk.has(product.id)}
-                                            onChange={() => toggleProductSelectionForBulk(product.id)}
-                                            title="Toplu işlem için seç"
-                                          />
                                         </div>
                                       </TableCell>
                                       <TableCell className="font-medium">
