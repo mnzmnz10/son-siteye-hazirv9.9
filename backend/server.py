@@ -4502,7 +4502,8 @@ async def get_products(
             
             skip = (page - 1) * limit if not skip_pagination else 0
             # IMPORTANT: Use the same sorting as aggregate pipeline - FAVORITES FIRST!
-            products = await db.products.find(basic_query).sort([("is_favorite", -1), ("name", 1)]).skip(skip).limit(limit).to_list(limit)
+            query_limit = 5000 if skip_pagination else limit
+            products = await db.products.find(basic_query).sort([("is_favorite", -1), ("name", 1)]).skip(skip).limit(query_limit).to_list(query_limit)
             
             # Convert Decimal fields to float for JSON serialization
             response_data = []
