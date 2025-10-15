@@ -648,6 +648,130 @@ function App() {
     );
   });
 
+  // ===========================
+  // BULK OPERATIONS FUNCTIONS
+  // ===========================
+
+  const downloadTemplate = async () => {
+    try {
+      const response = await fetch(`${API}/products/export/template`);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'urun_sablonu.xlsx';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast.success('Şablon indirildi');
+    } catch (error) {
+      console.error('Error downloading template:', error);
+      toast.error('Şablon indirilemedi');
+    }
+  };
+
+  const exportProducts = async () => {
+    try {
+      const params = new URLSearchParams();
+      if (selectedCategory) params.append('category_id', selectedCategory);
+      
+      const response = await fetch(`${API}/products/export?${params.toString()}`);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `urunler_${new Date().toISOString().slice(0,10)}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast.success('Ürünler dışa aktarıldı');
+    } catch (error) {
+      console.error('Error exporting products:', error);
+      toast.error('Ürünler dışa aktarılamadı');
+    }
+  };
+
+  const bulkUpdatePrice = async () => {
+    if (selectedProductsForBulk.size === 0) {
+      toast.error('Lütfen en az bir ürün seçin');
+      return;
+    }
+
+    if (!bulkPriceChangeValue) {
+      toast.error('Lütfen fiyat değişikliği değeri girin');
+      return;
+    }
+
+    try {
+      const response = await axios.post(`${API}/products/bulk-update-price`, {
+        product_ids: Array.from(selectedProductsForBulk),
+        price_change_type: bulkPriceChangeType,
+        price_change_value: parseFloat(bulkPriceChangeValue),
+        apply_to: bulkPriceApplyTo
+      });
+
+      toast.success(response.data.message);
+      setShowBulkPriceModal(false);
+      setBulkPriceChangeValue(0);
+      setSelectedProductsForBulk(new Set());
+      await loadProducts(1, true);
+    } catch (error) {
+      console.error('Error bulk updating prices:', error);
+      toast.error('Fiyatlar güncellenemedi');
+    }
+  };
+
+  const bulkUpdateCategory = async () => {
+    if (selectedProductsForBulk.size === 0) {
+      toast.error('Lütfen en az bir ürün seçin');
+      return;
+    }
+
+    if (!bulkCategoryId) {
+      toast.error('Lütfen bir kategori seçin');
+      return;
+    }
+
+    try {
+      const response = await axios.post(`${API}/products/bulk-update-category`, {
+        product_ids: Array.from(selectedProductsForBulk),
+        category_id: bulkCategoryId
+      });
+
+      toast.success(response.data.message);
+      setShowBulkCategoryModal(false);
+      setBulkCategoryId('');
+      setSelectedProductsForBulk(new Set());
+      await loadProducts(1, true);
+    } catch (error) {
+      console.error('Error bulk updating category:', error);
+      toast.error('Kategoriler güncellenemedi');
+    }
+  };
+
+  const toggleProductSelection = (productId) => {
+    const newSelection = new Set(selectedProductsForBulk);
+    if (newSelection.has(productId)) {
+      newSelection.delete(productId);
+    } else {
+      newSelection.add(productId);
+    }
+    setSelectedProductsForBulk(newSelection);
+  };
+
+  const selectAllProducts = () => {
+    const allIds = new Set(products.map(p => p.id));
+    setSelectedProductsForBulk(allIds);
+    toast.success(`${allIds.size} ürün seçildi`);
+  };
+
+  const deselectAllProducts = () => {
+    setSelectedProductsForBulk(new Set());
+    toast.success('Seçim temizlendi');
+  };
+
 
 
   const loadExchangeRates = async (forceUpdate = false, showToast = true) => {
