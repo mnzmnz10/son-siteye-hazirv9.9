@@ -62,6 +62,21 @@ function App() {
   });
   const [categories, setCategories] = useState([]);
   
+  // Customers state
+  const [customers, setCustomers] = useState([]);
+  const [showCustomerModal, setShowCustomerModal] = useState(false);
+  const [editingCustomer, setEditingCustomer] = useState(null);
+  const [customerForm, setCustomerForm] = useState({
+    name: '',
+    surname: '',
+    company: '',
+    phone: '',
+    email: '',
+    address: '',
+    notes: ''
+  });
+  const [customerSearchQuery, setCustomerSearchQuery] = useState('');
+  
   // Category Groups state
   const [categoryGroups, setCategoryGroups] = useState([]);
   const [showCategoryGroupDialog, setShowCategoryGroupDialog] = useState(false);
