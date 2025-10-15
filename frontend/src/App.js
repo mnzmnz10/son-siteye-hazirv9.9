@@ -4248,6 +4248,45 @@ function App() {
                 <CardDescription>Tüm yüklenmiş ürünler ve fiyatları</CardDescription>
               </CardHeader>
               <CardContent>
+                {/* Toplu İşlemler Bar */}
+                {selectedProductsForBulk.size > 0 && (
+                  <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Check className="w-5 h-5 text-blue-600" />
+                        <span className="font-medium text-blue-900">
+                          {selectedProductsForBulk.size} ürün seçildi
+                        </span>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={deselectAllProducts}
+                        >
+                          Seçimi Temizle
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() => setShowBulkPriceModal(true)}
+                          className="bg-orange-600 hover:bg-orange-700"
+                        >
+                          <DollarSign className="w-4 h-4 mr-2" />
+                          Toplu Fiyat
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() => setShowBulkCategoryModal(true)}
+                          className="bg-purple-600 hover:bg-purple-700"
+                        >
+                          <Tags className="w-4 h-4 mr-2" />
+                          Toplu Kategori
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Action Bar */}
                 <div className="flex justify-between items-center mb-4">
                   <div className="flex items-center gap-4">
