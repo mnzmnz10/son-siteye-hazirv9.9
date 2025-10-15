@@ -99,6 +99,8 @@ function App() {
   const [quoteDiscount, setQuoteDiscount] = useState(0);
   const [quoteLaborCost, setQuoteLaborCost] = useState(0); // İşçilik maliyeti state'i
   const [quoteNotes, setQuoteNotes] = useState(''); // Teklif notları state'i
+  const [selectedQuoteCustomer, setSelectedQuoteCustomer] = useState(''); // Seçili müşteri ID
+  const [showQuickCustomerModal, setShowQuickCustomerModal] = useState(false); // Hızlı müşteri ekleme modal'ı
   const [loadedQuote, setLoadedQuote] = useState(null); // Yüklenen teklif bilgisi
   const [showDiscountedPrices, setShowDiscountedPrices] = useState(false); // İndirimli fiyat görünürlüğü - Varsayılan KAPALI
   const [showQuoteDiscountedPrices, setShowQuoteDiscountedPrices] = useState(false); // Teklif indirimli fiyat görünürlüğü - Varsayılan KAPALI
