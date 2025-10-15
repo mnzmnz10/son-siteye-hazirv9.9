@@ -4712,7 +4712,7 @@ function App() {
                                             type="checkbox"
                                             className="rounded border-blue-500 text-blue-600"
                                             checked={selectedProductsForBulk.has(product.id)}
-                                            onChange={() => toggleProductSelection(product.id)}
+                                            onChange={() => toggleProductSelectionForBulk(product.id)}
                                             title="Toplu işlem için seç"
                                           />
                                         </div>
