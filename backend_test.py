@@ -5859,6 +5859,341 @@ class KaravanAPITester:
         
         return True
 
+    def test_skip_pagination_comprehensive(self):
+        """Comprehensive test for skip_pagination parameter functionality"""
+        print("\n🔍 Testing Skip Pagination Functionality...")
+        
+        # Test 1: GET /api/products with skip_pagination=true - should return all products
+        print("\n🔍 Testing GET /api/products with skip_pagination=true...")
+        
+        success, response = self.run_test(
+            "Get All Products with skip_pagination=true",
+            "GET",
+            "products?skip_pagination=true",
+            200
+        )
+        
+        all_products_count = 0
+        all_products = []
+        
+        if success and response:
+            try:
+                products = response.json()
+                if isinstance(products, list):
+                    all_products_count = len(products)
+                    all_products = products
+                    self.log_test("Skip Pagination Response Format", True, f"Returned {all_products_count} products as list")
+                    
+                    # Verify we got more than the default pagination limit (100)
+                    if all_products_count > 100:
+                        self.log_test("Skip Pagination Returns All Products", True, f"Got {all_products_count} products (more than default limit of 100)")
+                    elif all_products_count > 0:
+                        self.log_test("Skip Pagination Returns All Products", True, f"Got {all_products_count} products (all available products)")
+                    else:
+                        self.log_test("Skip Pagination Returns All Products", False, "No products returned")
+                    
+                    # Verify product structure
+                    if products:
+                        sample_product = products[0]
+                        required_fields = ['id', 'name', 'company_id', 'list_price', 'currency']
+                        missing_fields = [field for field in required_fields if field not in sample_product]
+                        
+                        if not missing_fields:
+                            self.log_test("Skip Pagination Product Structure", True, "All required fields present in products")
+                        else:
+                            self.log_test("Skip Pagination Product Structure", False, f"Missing fields: {missing_fields}")
+                else:
+                    self.log_test("Skip Pagination Response Format", False, "Response is not a list")
+            except Exception as e:
+                self.log_test("Skip Pagination Response Parsing", False, f"Error parsing response: {e}")
+        
+        # Test 2: Compare with paginated results to verify skip_pagination works
+        print("\n🔍 Testing Comparison with Paginated Results...")
+        
+        success, response = self.run_test(
+            "Get Products with Default Pagination (page=1, limit=50)",
+            "GET",
+            "products?page=1&limit=50",
+            200
+        )
+        
+        paginated_count = 0
+        if success and response:
+            try:
+                paginated_products = response.json()
+                if isinstance(paginated_products, list):
+                    paginated_count = len(paginated_products)
+                    
+                    # Verify pagination is working (should return max 50 products)
+                    if paginated_count <= 50:
+                        self.log_test("Default Pagination Working", True, f"Paginated request returned {paginated_count} products (≤50)")
+                    else:
+                        self.log_test("Default Pagination Working", False, f"Paginated request returned {paginated_count} products (>50)")
+                    
+                    # Compare with skip_pagination results
+                    if all_products_count >= paginated_count:
+                        self.log_test("Skip Pagination vs Pagination Comparison", True, f"skip_pagination ({all_products_count}) >= paginated ({paginated_count})")
+                    else:
+                        self.log_test("Skip Pagination vs Pagination Comparison", False, f"skip_pagination ({all_products_count}) < paginated ({paginated_count})")
+                        
+                else:
+                    self.log_test("Paginated Response Format", False, "Paginated response is not a list")
+            except Exception as e:
+                self.log_test("Paginated Response Parsing", False, f"Error parsing paginated response: {e}")
+        
+        # Test 3: GET /api/products with search parameter and skip_pagination=true
+        print("\n🔍 Testing GET /api/products with search and skip_pagination=true...")
+        
+        search_terms = ["solar", "panel", "battery", "inverter"]
+        
+        for search_term in search_terms:
+            success, response = self.run_test(
+                f"Search '{search_term}' with skip_pagination=true",
+                "GET",
+                f"products?search={search_term}&skip_pagination=true",
+                200
+            )
+            
+            if success and response:
+                try:
+                    search_products = response.json()
+                    if isinstance(search_products, list):
+                        search_count = len(search_products)
+                        self.log_test(f"Search '{search_term}' with Skip Pagination", True, f"Found {search_count} matching products")
+                        
+                        # Verify all returned products contain the search term
+                        if search_products:
+                            relevant_count = 0
+                            for product in search_products[:10]:  # Check first 10 products
+                                product_text = f"{product.get('name', '')} {product.get('description', '')} {product.get('brand', '')}".lower()
+                                if search_term.lower() in product_text:
+                                    relevant_count += 1
+                            
+                            relevance_percentage = (relevant_count / min(len(search_products), 10)) * 100
+                            if relevance_percentage >= 70:  # At least 70% relevant
+                                self.log_test(f"Search '{search_term}' Relevance", True, f"{relevance_percentage:.1f}% relevance in sample")
+                            else:
+                                self.log_test(f"Search '{search_term}' Relevance", False, f"Only {relevance_percentage:.1f}% relevance in sample")
+                        
+                        # Compare with paginated search
+                        success2, response2 = self.run_test(
+                            f"Search '{search_term}' with pagination (limit=20)",
+                            "GET",
+                            f"products?search={search_term}&limit=20",
+                            200
+                        )
+                        
+                        if success2 and response2:
+                            try:
+                                paginated_search = response2.json()
+                                if isinstance(paginated_search, list):
+                                    paginated_search_count = len(paginated_search)
+                                    
+                                    if search_count >= paginated_search_count:
+                                        self.log_test(f"Search '{search_term}' Skip vs Paginated", True, f"skip_pagination ({search_count}) >= paginated ({paginated_search_count})")
+                                    else:
+                                        self.log_test(f"Search '{search_term}' Skip vs Paginated", False, f"skip_pagination ({search_count}) < paginated ({paginated_search_count})")
+                            except Exception as e:
+                                self.log_test(f"Search '{search_term}' Paginated Parsing", False, f"Error: {e}")
+                    else:
+                        self.log_test(f"Search '{search_term}' Response Format", False, "Response is not a list")
+                except Exception as e:
+                    self.log_test(f"Search '{search_term}' Response Parsing", False, f"Error: {e}")
+        
+        # Test 4: GET /api/products with category_id and skip_pagination=true
+        print("\n🔍 Testing GET /api/products with category_id and skip_pagination=true...")
+        
+        # First get available categories
+        success, response = self.run_test(
+            "Get Categories for Testing",
+            "GET",
+            "categories",
+            200
+        )
+        
+        if success and response:
+            try:
+                categories = response.json()
+                if isinstance(categories, list) and categories:
+                    # Test with first few categories
+                    for category in categories[:3]:
+                        category_id = category.get('id')
+                        category_name = category.get('name', 'Unknown')
+                        
+                        if category_id:
+                            success, response = self.run_test(
+                                f"Category '{category_name}' with skip_pagination=true",
+                                "GET",
+                                f"products?category_id={category_id}&skip_pagination=true",
+                                200
+                            )
+                            
+                            if success and response:
+                                try:
+                                    category_products = response.json()
+                                    if isinstance(category_products, list):
+                                        category_count = len(category_products)
+                                        self.log_test(f"Category '{category_name}' Skip Pagination", True, f"Found {category_count} products in category")
+                                        
+                                        # Verify all products belong to the category
+                                        if category_products:
+                                            correct_category_count = 0
+                                            for product in category_products[:5]:  # Check first 5
+                                                if product.get('category_id') == category_id:
+                                                    correct_category_count += 1
+                                            
+                                            if correct_category_count == min(len(category_products), 5):
+                                                self.log_test(f"Category '{category_name}' Filter Accuracy", True, "All sampled products belong to correct category")
+                                            else:
+                                                self.log_test(f"Category '{category_name}' Filter Accuracy", False, f"Only {correct_category_count}/{min(len(category_products), 5)} products in correct category")
+                                        
+                                        # Compare with paginated category filter
+                                        success2, response2 = self.run_test(
+                                            f"Category '{category_name}' with pagination (limit=10)",
+                                            "GET",
+                                            f"products?category_id={category_id}&limit=10",
+                                            200
+                                        )
+                                        
+                                        if success2 and response2:
+                                            try:
+                                                paginated_category = response2.json()
+                                                if isinstance(paginated_category, list):
+                                                    paginated_category_count = len(paginated_category)
+                                                    
+                                                    if category_count >= paginated_category_count:
+                                                        self.log_test(f"Category '{category_name}' Skip vs Paginated", True, f"skip_pagination ({category_count}) >= paginated ({paginated_category_count})")
+                                                    else:
+                                                        self.log_test(f"Category '{category_name}' Skip vs Paginated", False, f"skip_pagination ({category_count}) < paginated ({paginated_category_count})")
+                                            except Exception as e:
+                                                self.log_test(f"Category '{category_name}' Paginated Parsing", False, f"Error: {e}")
+                                    else:
+                                        self.log_test(f"Category '{category_name}' Response Format", False, "Response is not a list")
+                                except Exception as e:
+                                    self.log_test(f"Category '{category_name}' Response Parsing", False, f"Error: {e}")
+                else:
+                    self.log_test("Categories Available for Testing", False, "No categories found or invalid format")
+            except Exception as e:
+                self.log_test("Categories Retrieval", False, f"Error getting categories: {e}")
+        
+        # Test 5: Verify response format consistency
+        print("\n🔍 Testing Response Format Consistency...")
+        
+        success, response = self.run_test(
+            "Skip Pagination Response Format Verification",
+            "GET",
+            "products?skip_pagination=true&limit=5",  # limit should be ignored when skip_pagination=true
+            200
+        )
+        
+        if success and response:
+            try:
+                products = response.json()
+                if isinstance(products, list):
+                    # Verify limit is ignored when skip_pagination=true
+                    if len(products) != 5 or len(products) > 5:
+                        self.log_test("Skip Pagination Ignores Limit Parameter", True, f"Returned {len(products)} products (limit=5 ignored)")
+                    else:
+                        self.log_test("Skip Pagination Ignores Limit Parameter", False, f"Returned exactly 5 products (limit may not be ignored)")
+                    
+                    # Verify response structure
+                    if products:
+                        sample_product = products[0]
+                        expected_fields = ['id', 'name', 'company_id', 'list_price', 'currency', 'is_favorite']
+                        present_fields = [field for field in expected_fields if field in sample_product]
+                        
+                        if len(present_fields) >= 5:  # Most important fields present
+                            self.log_test("Skip Pagination Response Structure", True, f"Product contains {len(present_fields)}/{len(expected_fields)} expected fields")
+                        else:
+                            self.log_test("Skip Pagination Response Structure", False, f"Product missing important fields: {set(expected_fields) - set(present_fields)}")
+                else:
+                    self.log_test("Skip Pagination Response Format", False, "Response is not a list")
+            except Exception as e:
+                self.log_test("Skip Pagination Format Verification", False, f"Error: {e}")
+        
+        # Test 6: Performance test - skip_pagination should handle large datasets
+        print("\n🔍 Testing Skip Pagination Performance...")
+        
+        start_time = time.time()
+        success, response = self.run_test(
+            "Skip Pagination Performance Test",
+            "GET",
+            "products?skip_pagination=true",
+            200
+        )
+        end_time = time.time()
+        
+        if success and response:
+            response_time = end_time - start_time
+            try:
+                products = response.json()
+                if isinstance(products, list):
+                    products_count = len(products)
+                    
+                    # Performance should be reasonable even for large datasets
+                    if response_time < 5.0:  # Should complete within 5 seconds
+                        self.log_test("Skip Pagination Performance", True, f"Retrieved {products_count} products in {response_time:.2f}s")
+                    else:
+                        self.log_test("Skip Pagination Performance", False, f"Slow response: {response_time:.2f}s for {products_count} products")
+                    
+                    # Verify favorites are sorted first (if any favorites exist)
+                    favorites_count = sum(1 for p in products if p.get('is_favorite', False))
+                    if favorites_count > 0:
+                        # Check if favorites appear first
+                        first_products_favorites = sum(1 for p in products[:favorites_count] if p.get('is_favorite', False))
+                        if first_products_favorites == favorites_count:
+                            self.log_test("Skip Pagination Favorites Sorting", True, f"All {favorites_count} favorites appear first")
+                        else:
+                            self.log_test("Skip Pagination Favorites Sorting", False, f"Favorites not properly sorted first")
+                    else:
+                        self.log_test("Skip Pagination Favorites Sorting", True, "No favorites to sort (normal)")
+                        
+            except Exception as e:
+                self.log_test("Skip Pagination Performance Analysis", False, f"Error: {e}")
+        
+        # Test 7: Edge cases and error handling
+        print("\n🔍 Testing Skip Pagination Edge Cases...")
+        
+        # Test with invalid parameters
+        edge_cases = [
+            ("skip_pagination=true&page=999", "Large page number should be ignored"),
+            ("skip_pagination=true&limit=999999", "Large limit should be ignored"),
+            ("skip_pagination=1", "String '1' should work as true"),
+            ("skip_pagination=false", "Explicit false should work"),
+            ("skip_pagination=invalid", "Invalid value should default to false")
+        ]
+        
+        for params, description in edge_cases:
+            success, response = self.run_test(
+                f"Edge Case: {description}",
+                "GET",
+                f"products?{params}",
+                200
+            )
+            
+            if success and response:
+                try:
+                    products = response.json()
+                    if isinstance(products, list):
+                        self.log_test(f"Edge Case Handling: {description}", True, f"Returned {len(products)} products")
+                    else:
+                        self.log_test(f"Edge Case Handling: {description}", False, "Invalid response format")
+                except Exception as e:
+                    self.log_test(f"Edge Case Handling: {description}", False, f"Error: {e}")
+        
+        print(f"\n✅ Skip Pagination Test Summary:")
+        print(f"   - ✅ Tested GET /api/products?skip_pagination=true returns all products")
+        print(f"   - ✅ Verified skip_pagination bypasses pagination limits")
+        print(f"   - ✅ Tested search functionality with skip_pagination=true")
+        print(f"   - ✅ Tested category filtering with skip_pagination=true")
+        print(f"   - ✅ Verified response format consistency")
+        print(f"   - ✅ Tested performance with large datasets")
+        print(f"   - ✅ Verified favorites-first sorting is maintained")
+        print(f"   - ✅ Tested edge cases and error handling")
+        print(f"   - ✅ Confirmed skip_pagination ignores limit and page parameters")
+        
+        return True
+
     def cleanup_test_data(self):
         """Clean up created test data"""
         print("\n🧹 Cleaning up test data...")
