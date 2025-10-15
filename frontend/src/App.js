@@ -432,37 +432,25 @@ function App() {
     try {
       setLoadingProducts(true);
       
-      // If we're resetting page (due to search/filter), start from page 1
-      if (resetPage) {
-        page = 1;
-        setCurrentPage(1);
-      }
-      
       const params = new URLSearchParams();
       if (searchQuery) params.append('search', searchQuery);
       if (selectedCategory) params.append('category_id', selectedCategory);
-      params.append('page', page.toString());
-      params.append('limit', productsPerPage.toString());
+      // Load all products at once without pagination
+      params.append('skip_pagination', 'true');
       
       // Get products and count simultaneously
       const [productsResponse, countResponse] = await Promise.all([
         axios.get(`${API}/products?${params.toString()}`),
-        axios.get(`${API}/products/count?${params.toString().replace(/page=\d+&?/, '').replace(/limit=\d+&?/, '')}`)
+        axios.get(`${API}/products/count?${params.toString().replace(/skip_pagination=true&?/, '')}`)
       ]);
       
       const newProducts = productsResponse.data;
       const totalCount = countResponse.data.count;
       
-      // If it's the first page or a reset, replace products
-      if (page === 1 || resetPage) {
-        setProducts(newProducts);
-      } else {
-        // If it's a subsequent page, append products
-        setProducts(prev => [...prev, ...newProducts]);
-      }
-      
+      // Always replace products since we're loading all at once
+      setProducts(newProducts);
       setTotalProducts(totalCount);
-      setCurrentPage(page);
+      setCurrentPage(1);
       setStats(prev => ({ ...prev, totalProducts: totalCount }));
       
     } catch (error) {
