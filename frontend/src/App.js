@@ -5054,6 +5054,7 @@ function App() {
 
                               const newQuoteData = {
                                 name: quoteName || `Teklif - ${new Date().toLocaleDateString('tr-TR')}`,
+                                customer_id: selectedQuoteCustomer || null,
                                 discount_percentage: parseFloat(quoteDiscount) || 0,
                                 labor_cost: parseFloat(quoteLaborCost) || 0,
                                 products: selectedProductData,
