@@ -2269,7 +2269,7 @@ function App() {
       productCount: selectedProductsData.length,
       totalQuantity: totalQuantity
     };
-  }, [getSelectedProductsData, showQuoteDiscountedPrices, quoteDiscount, quoteLaborCost]);
+  }, [selectedProducts, selectedProductsData, showQuoteDiscountedPrices, quoteDiscount, quoteLaborCost]);
 
   // Package totals calculation (similar to quote totals)
   const calculatePackageTotals = useMemo(() => {
