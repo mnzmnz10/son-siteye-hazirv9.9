@@ -2620,7 +2620,7 @@ function App() {
         </div>
       ) : (
         /* Main Application */
-        <div className="container mx-auto p-6">
+        <div className="container mx-auto px-2 py-4 max-w-full">
           {/* Header */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-2">
