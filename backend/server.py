@@ -3249,7 +3249,7 @@ class PDFPackageGenerator(PDFQuoteGenerator):
         # Euro karşılığı
         try:
             # Use cached exchange rates (no async needed)
-            eur_rate = float(currency_service._cached_rates.get('EUR', 48.5)) if currency_service._cached_rates else 48.5
+            eur_rate = float(currency_service.rates_cache.get('EUR', 48.5)) if currency_service.rates_cache else 48.5
             final_total_eur = final_total / eur_rate
             
             table_data.append([
