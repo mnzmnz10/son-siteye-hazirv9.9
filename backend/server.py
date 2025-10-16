@@ -3248,15 +3248,8 @@ class PDFPackageGenerator(PDFQuoteGenerator):
         
         # Euro karşılığı
         try:
-            # Use global currency_service instance
-            import asyncio
-            
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            rates = loop.run_until_complete(currency_service.get_exchange_rates())
-            loop.close()
-            
-            eur_rate = float(rates.get('EUR', 48.5))
+            # Use cached exchange rates (no async needed)
+            eur_rate = float(currency_service._cached_rates.get('EUR', 48.5)) if currency_service._cached_rates else 48.5
             final_total_eur = final_total / eur_rate
             
             table_data.append([
