@@ -5222,12 +5222,12 @@ class BulkUpdateCategoryRequest(BaseModel):
 async def bulk_update_price(request: BulkUpdatePriceRequest):
     """Bulk update product prices"""
     try:
-        if not product_ids:
+        if not request.product_ids:
             raise HTTPException(status_code=400, detail="Ürün seçilmedi")
         
         updated_count = 0
         
-        for product_id in product_ids:
+        for product_id in request.product_ids:
             product = await db.products.find_one({"id": product_id})
             if not product:
                 continue
@@ -5235,25 +5235,25 @@ async def bulk_update_price(request: BulkUpdatePriceRequest):
             update_data = {}
             
             # Get current price
-            current_price = float(product.get(apply_to, 0))
+            current_price = float(product.get(request.apply_to, 0))
             
             # Calculate new price
-            if price_change_type == "percentage":
-                new_price = current_price * (1 + price_change_value / 100)
+            if request.price_change_type == "percentage":
+                new_price = current_price * (1 + request.price_change_value / 100)
             else:  # fixed
-                new_price = current_price + price_change_value
+                new_price = current_price + request.price_change_value
             
             # Ensure positive price
             new_price = max(0, new_price)
             
             # Update price
-            update_data[apply_to] = new_price
+            update_data[request.apply_to] = new_price
             
             # Recalculate TRY prices
             currency = product.get("currency", "USD")
             rates = await currency_service.get_exchange_rates()
             
-            if apply_to == "list_price":
+            if request.apply_to == "list_price":
                 update_data["list_price_try"] = await currency_service.convert_to_try(new_price, currency)
             else:
                 update_data["discounted_price_try"] = await currency_service.convert_to_try(new_price, currency)
@@ -5278,10 +5278,7 @@ async def bulk_update_price(request: BulkUpdatePriceRequest):
         raise HTTPException(status_code=500, detail="Fiyatlar toplu güncellenemedi")
 
 @api_router.post("/products/bulk-update-category")
-async def bulk_update_category(
-    product_ids: List[str],
-    category_id: str
-):
+async def bulk_update_category(request: BulkUpdateCategoryRequest):
     """Bulk update product category"""
     try:
         if not product_ids:
