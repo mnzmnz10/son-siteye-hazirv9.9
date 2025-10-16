@@ -2791,6 +2791,20 @@ function App() {
                     <Plus className="w-4 h-4 mr-2" />
                     Firma Ekle
                   </Button>
+                  <Button
+                    variant="outline"
+                    onClick={downloadTemplate}
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Şablon İndir
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={exportProducts}
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    Ürün Export
+                  </Button>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
