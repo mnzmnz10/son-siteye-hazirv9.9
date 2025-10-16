@@ -2832,7 +2832,18 @@ function App() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {companies.map((company) => (
+                  {companies.length === 0 ? (
+                    <div className="col-span-full text-center py-16">
+                      <Building2 className="w-20 h-20 mx-auto mb-4 text-slate-300" />
+                      <h3 className="text-xl font-semibold text-slate-700 mb-2">Henüz firma eklenmedi</h3>
+                      <p className="text-slate-500 mb-6">Tedarikçi firmalarınızı ekleyerek ürünlerinizi yönetmeye başlayın</p>
+                      <Button onClick={() => document.querySelector('input[placeholder="Firma adı"]').focus()}>
+                        <Plus className="w-4 h-4 mr-2" />
+                        İlk Firmayı Ekle
+                      </Button>
+                    </div>
+                  ) : (
+                    companies.map((company) => (
                     <Card key={company.id} className="border-slate-200">
                       <CardHeader className="pb-3">
                         <CardTitle className="text-lg">{company.name}</CardTitle>
