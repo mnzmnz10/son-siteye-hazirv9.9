@@ -6260,7 +6260,7 @@ function App() {
       
       {/* Package Create/Edit Dialog */}
       <Dialog open={showPackageDialog} onOpenChange={setShowPackageDialog}>
-        <DialogContent className="max-w-6xl w-[88vw] max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-6xl w-[80vw] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingPackage ? 'Paketi Düzenle' : 'Yeni Paket Oluştur'}</DialogTitle>
             <DialogDescription>
