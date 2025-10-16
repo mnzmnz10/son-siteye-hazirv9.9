@@ -2144,11 +2144,13 @@ async def create_quote(quote: QuoteCreate):
             quantity = product_quantities.get(product["id"], 1)
             
             list_price_try = float(product.get("list_price_try", 0))
+            # PDF için özel fiyat mantığı: özel fiyat varsa onu, yoksa liste fiyatını kullan
+            # İndirimli fiyat sadece görüntüleme amaçlı
             discounted_price_try = float(product.get("discounted_price_try", 0)) if product.get("discounted_price_try") else list_price_try
             
-            # Calculate totals with quantity
+            # Calculate totals with quantity - SADECE LİSTE FİYATI KULLAN
             total_list_price += list_price_try * quantity
-            total_discounted_price += discounted_price_try * quantity
+            total_discounted_price += list_price_try * quantity  # PDF için liste fiyatı kullan
             
             processed_products.append({
                 "id": product["id"],
