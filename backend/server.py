@@ -5207,13 +5207,19 @@ async def export_products(
         logger.error(f"Error exporting products: {e}")
         raise HTTPException(status_code=500, detail="Ürünler dışa aktarılamadı")
 
-@api_router.post("/products/bulk-update-price")
-async def bulk_update_price(
-    product_ids: List[str],
-    price_change_type: str,  # "percentage" or "fixed"
-    price_change_value: float,
+# Bulk Operations Models
+class BulkUpdatePriceRequest(BaseModel):
+    product_ids: List[str]
+    price_change_type: str  # "percentage" or "fixed"
+    price_change_value: float
     apply_to: str = "list_price"  # "list_price" or "discounted_price"
-):
+
+class BulkUpdateCategoryRequest(BaseModel):
+    product_ids: List[str]
+    category_id: str
+
+@api_router.post("/products/bulk-update-price")
+async def bulk_update_price(request: BulkUpdatePriceRequest):
     """Bulk update product prices"""
     try:
         if not product_ids:
