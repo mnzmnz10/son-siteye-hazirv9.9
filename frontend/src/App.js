@@ -2652,41 +2652,57 @@ function App() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <StatsCard
-            title="Toplam Firma"
-            value={stats.totalCompanies}
-            icon={Building2}
-            description="Kayıtlı tedarikçi sayısı"
-          />
-          <StatsCard
-            title="Toplam Ürün"
-            value={stats.totalProducts}
-            icon={Package}
-            description="Sisteme yüklenmiş ürün"
-          />
-          <Card className="bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-emerald-800">Döviz Kurları</CardTitle>
-              <DollarSign className="h-4 w-4 text-emerald-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-1">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-emerald-700">USD/TRY:</span>
-                  <span className="text-lg font-bold text-emerald-900">
-                    {exchangeRates.USD ? formatExchangeRate(exchangeRates.USD) : '---'}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-emerald-700">EUR/TRY:</span>
-                  <span className="text-lg font-bold text-emerald-900">
-                    {exchangeRates.EUR ? formatExchangeRate(exchangeRates.EUR) : '---'}
-                  </span>
-                </div>
-              </div>
-              <p className="text-xs text-emerald-600 mt-1">Güncel döviz kurları</p>
-            </CardContent>
-          </Card>
+          {loading ? (
+            // Loading skeletons
+            <>
+              {[1, 2, 3].map((i) => (
+                <Card key={i} className="animate-pulse">
+                  <CardHeader>
+                    <div className="h-4 bg-slate-200 rounded w-1/2 mb-2"></div>
+                    <div className="h-8 bg-slate-300 rounded w-1/3"></div>
+                  </CardHeader>
+                </Card>
+              ))}
+            </>
+          ) : (
+            <>
+              <StatsCard
+                title="Toplam Firma"
+                value={stats.totalCompanies}
+                icon={Building2}
+                description="Kayıtlı tedarikçi sayısı"
+              />
+              <StatsCard
+                title="Toplam Ürün"
+                value={stats.totalProducts}
+                icon={Package}
+                description="Sisteme yüklenmiş ürün"
+              />
+              <Card className="bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-emerald-800">Döviz Kurları</CardTitle>
+                  <DollarSign className="h-4 w-4 text-emerald-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-1">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-emerald-700">USD/TRY:</span>
+                      <span className="text-lg font-bold text-emerald-900">
+                        {exchangeRates.USD ? formatExchangeRate(exchangeRates.USD) : '---'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-emerald-700">EUR/TRY:</span>
+                      <span className="text-lg font-bold text-emerald-900">
+                        {exchangeRates.EUR ? formatExchangeRate(exchangeRates.EUR) : '---'}
+                      </span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-emerald-600 mt-1">Güncel döviz kurları</p>
+                </CardContent>
+              </Card>
+            </>
+          )}
         </div>
 
         {/* Action Buttons */}
