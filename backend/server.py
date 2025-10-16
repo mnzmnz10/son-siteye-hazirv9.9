@@ -3314,8 +3314,8 @@ async def download_package_pdf_with_prices(package_id: str):
                     # Custom price is set for this product in the package
                     effective_price_try = float(custom_price)
                 else:
-                    # Use original product prices
-                    effective_price_try = float(product.get("discounted_price_try") or product.get("list_price_try", 0))
+                    # Use LIST PRICE (not discounted price) - PDF için liste fiyatı
+                    effective_price_try = float(product.get("list_price_try", 0))
                 
                 product_data = {
                     "name": product["name"],
