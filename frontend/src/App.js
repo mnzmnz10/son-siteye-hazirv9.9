@@ -5051,7 +5051,11 @@ function App() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => setShowQuoteDiscountedPrices(!showQuoteDiscountedPrices)}
+                            onClick={() => {
+                              console.log('Quote toggle before:', showQuoteDiscountedPrices);
+                              setShowQuoteDiscountedPrices(!showQuoteDiscountedPrices);
+                              console.log('Quote toggle after:', !showQuoteDiscountedPrices);
+                            }}
                             className="p-1"
                             title={showQuoteDiscountedPrices ? "İndirimli fiyatları gizle" : "İndirimli fiyatları göster"}
                           >
