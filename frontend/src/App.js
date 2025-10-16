@@ -2292,10 +2292,19 @@ function App() {
       return sum + (price * quantity);
     }, 0);
     
-    // Toplam indirimli fiyat hesapla (sadece özel fiyatlı ürünler için, diğerleri liste fiyatı)
+    // Toplam indirimli fiyat hesapla
     const totalDiscountedPrice = packageWithProducts.products.reduce((sum, p) => {
-      // Özel fiyat varsa onu kullan, yoksa liste fiyatını kullan
-      const price = p.has_custom_price ? (parseFloat(p.custom_price) || 0) : (parseFloat(p.list_price_try) || 0);
+      let price = 0;
+      if (p.has_custom_price) {
+        // Özel fiyat varsa onu kullan
+        price = parseFloat(p.custom_price) || 0;
+      } else if (p.discounted_price_try) {
+        // Özel fiyat yoksa ürünün kendi indirimli fiyatını kullan
+        price = parseFloat(p.discounted_price_try) || 0;
+      } else {
+        // İkisi de yoksa liste fiyatını kullan
+        price = parseFloat(p.list_price_try) || 0;
+      }
       const quantity = p.quantity || 1;
       return sum + (price * quantity);
     }, 0);
