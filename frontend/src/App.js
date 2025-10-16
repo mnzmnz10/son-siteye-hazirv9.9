@@ -2318,7 +2318,7 @@ function App() {
       productCount: packageWithProducts.products.length,
       totalQuantity: totalQuantity
     };
-  }, [packageWithProducts, packageDiscount, packageLaborCost, showPackageDiscountedPrices]);
+  }, [packageWithProducts?.products, packageDiscount, packageLaborCost, showPackageDiscountedPrices]);
 
   const resetNewProductForm = () => {
     setNewProductForm({
