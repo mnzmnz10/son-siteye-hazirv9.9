@@ -4150,6 +4150,9 @@ function App() {
                           <div className="text-center">
                             <div className="text-2xl font-bold text-emerald-800">₺ {formatPrice(calculatePackageTotals.totalNetPrice)}</div>
                             <div className="text-sm text-emerald-600">Net Toplam</div>
+                            <div className="text-xs text-slate-500 italic mt-1">
+                              (€ {formatPrice(calculatePackageTotals.totalNetPrice / (exchangeRates.EUR || 48.5))} EUR)
+                            </div>
                           </div>
                         </div>
                       </div>
