@@ -6260,79 +6260,161 @@ function App() {
       
       {/* Package Create/Edit Dialog */}
       <Dialog open={showPackageDialog} onOpenChange={setShowPackageDialog}>
-        <DialogContent className="max-w-6xl w-[80vw] max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{editingPackage ? 'Paketi Düzenle' : 'Yeni Paket Oluştur'}</DialogTitle>
-            <DialogDescription>
-              Paket bilgilerini girin ve ürünleri seçin
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="package-name">Paket Adı</Label>
-              <Input
-                id="package-name"
-                value={packageForm.name}
-                onChange={(e) => setPackageForm({...packageForm, name: e.target.value})}
-                placeholder="Örn: Karavan1"
-              />
+        <DialogContent className="max-w-6xl w-[80vw] max-h-[90vh] overflow-y-auto p-0">
+          {/* Modern Header */}
+          <div className="bg-gradient-to-r from-teal-600 to-cyan-600 p-6 text-white">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold flex items-center gap-3">
+                <Package className="w-7 h-7" />
+                {editingPackage ? 'Paketi Düzenle' : 'Yeni Paket Oluştur'}
+              </DialogTitle>
+              <DialogDescription className="text-teal-50 text-base mt-2">
+                Paket bilgilerini girin ve ürünleri seçin
+              </DialogDescription>
+            </DialogHeader>
+          </div>
+
+          {/* Two Column Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
+            {/* Left Column - Package Info */}
+            <div className="space-y-4">
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border-2 border-blue-200 shadow-lg">
+                <h3 className="text-lg font-bold text-blue-900 mb-4 flex items-center gap-2">
+                  <FileText className="w-5 h-5" />
+                  Paket Bilgileri
+                </h3>
+                
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="package-name" className="text-blue-900 font-medium">
+                      Paket Adı <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      id="package-name"
+                      value={packageForm.name}
+                      onChange={(e) => setPackageForm({...packageForm, name: e.target.value})}
+                      placeholder="Örn: Premium Karavan Paketi"
+                      className="mt-1 border-blue-300 focus:border-blue-500"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="package-price" className="text-blue-900 font-medium">
+                      Satış Fiyatı (₺)
+                    </Label>
+                    <Input
+                      id="package-price"
+                      type="number"
+                      step="0.01"
+                      value={packageForm.sale_price}
+                      onChange={(e) => setPackageForm({...packageForm, sale_price: e.target.value})}
+                      placeholder="800000"
+                      className="mt-1 border-blue-300 focus:border-blue-500"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="package-discount" className="text-blue-900 font-medium">
+                      İndirim Yüzdesi (%)
+                    </Label>
+                    <Input
+                      id="package-discount"
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="0.1"
+                      value={packageForm.discount_percentage}
+                      onChange={(e) => setPackageForm({...packageForm, discount_percentage: e.target.value})}
+                      placeholder="0"
+                      className="mt-1 border-blue-300 focus:border-blue-500"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="package-notes" className="text-blue-900 font-medium">
+                      Notlar
+                    </Label>
+                    <textarea
+                      id="package-notes"
+                      className="flex min-h-[100px] w-full rounded-md border-2 border-blue-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none mt-1"
+                      value={packageForm.notes}
+                      onChange={(e) => setPackageForm({...packageForm, notes: e.target.value})}
+                      placeholder="Paket ile ilgili notlar, özel açıklamalar..."
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="package-image" className="text-blue-900 font-medium">
+                      Görsel URL
+                    </Label>
+                    <Input
+                      id="package-image"
+                      value={packageForm.image_url}
+                      onChange={(e) => setPackageForm({...packageForm, image_url: e.target.value})}
+                      placeholder="https://example.com/image.jpg"
+                      className="mt-1 border-blue-300 focus:border-blue-500"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
-            <div>
-              <Label htmlFor="package-price">Satış Fiyatı (₺)</Label>
-              <Input
-                id="package-price"
-                type="number"
-                step="0.01"
-                value={packageForm.sale_price}
-                onChange={(e) => setPackageForm({...packageForm, sale_price: e.target.value})}
-                placeholder="800000"
-              />
-            </div>
-            <div>
-              <Label htmlFor="package-discount">İndirim Yüzdesi (%)</Label>
-              <Input
-                id="package-discount"
-                type="number"
-                min="0"
-                max="100"
-                step="0.1"
-                value={packageForm.discount_percentage}
-                onChange={(e) => setPackageForm({...packageForm, discount_percentage: e.target.value})}
-                placeholder="0"
-              />
-            </div>
-            <div>
-              <Label htmlFor="package-notes">Notlar (Opsiyonel)</Label>
-              <textarea
-                id="package-notes"
-                className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                value={packageForm.notes}
-                onChange={(e) => setPackageForm({...packageForm, notes: e.target.value})}
-                placeholder="Paket ile ilgili notlar..."
-              />
-            </div>
-            <div>
-              <Label htmlFor="package-image">Görsel URL (Opsiyonel)</Label>
-              <Input
-                id="package-image"
-                value={packageForm.image_url}
-                onChange={(e) => setPackageForm({...packageForm, image_url: e.target.value})}
-                placeholder="https://example.com/image.jpg"
-              />
+
+            {/* Right Column - Products Selection */}
+            <div className="space-y-4">
+              <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border-2 border-green-200 shadow-lg">
+                <h3 className="text-lg font-bold text-green-900 mb-4 flex items-center gap-2">
+                  <Package className="w-5 h-5" />
+                  Ürünler (Yakında)
+                </h3>
+                
+                <div className="text-center py-8 text-green-700">
+                  <Package className="w-16 h-16 mx-auto mb-4 opacity-30" />
+                  <p className="text-sm">Ürün seçimi özelliği yakında eklenecek</p>
+                  <p className="text-xs mt-2 text-green-600">Şimdilik paket bilgilerini kaydedebilirsiniz</p>
+                </div>
+              </div>
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowPackageDialog(false)}>
-              İptal
-            </Button>
-            <Button 
-              onClick={editingPackage ? updatePackage : createPackage}
-              className="bg-teal-600 hover:bg-teal-700"
-              disabled={!packageForm.name}
-            >
-              {editingPackage ? 'Güncelle' : 'Oluştur'}
-            </Button>
-          </DialogFooter>
+
+          {/* Footer with Actions */}
+          <div className="border-t bg-slate-50 p-6 flex items-center justify-between">
+            <div className="text-sm text-slate-600">
+              {packageForm.name ? (
+                <span className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-green-600" />
+                  Paket adı girildi
+                </span>
+              ) : (
+                <span className="text-red-600">* Paket adı zorunludur</span>
+              )}
+            </div>
+            <div className="flex gap-3">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowPackageDialog(false)}
+                className="px-6"
+              >
+                İptal
+              </Button>
+              <Button 
+                onClick={editingPackage ? updatePackage : createPackage}
+                className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white px-8"
+                disabled={!packageForm.name}
+              >
+                {editingPackage ? (
+                  <>
+                    <Save className="w-4 h-4 mr-2" />
+                    Güncelle
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Oluştur
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
 
