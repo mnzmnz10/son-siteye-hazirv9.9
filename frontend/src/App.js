@@ -2544,10 +2544,18 @@ function App() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-25 to-teal-50">
       {/* Authentication Loading */}
       {authLoading ? (
-        <div className="flex items-center justify-center min-h-screen">
+        <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
           <div className="text-center">
-            <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-4 text-emerald-600" />
-            <p className="text-slate-600">Yükleniyor...</p>
+            <div className="relative">
+              <div className="w-20 h-20 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-6"></div>
+              <img 
+                src="/logo.png" 
+                alt="Logo" 
+                className="w-12 h-12 object-contain absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+              />
+            </div>
+            <h2 className="text-2xl font-bold text-slate-800 mb-2">Çorlu Karavan</h2>
+            <p className="text-slate-600">Sistem yükleniyor...</p>
           </div>
         </div>
       ) : !isAuthenticated ? (
