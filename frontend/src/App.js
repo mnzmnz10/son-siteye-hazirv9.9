@@ -5372,6 +5372,9 @@ function App() {
                             ₺ {formatPrice(calculateQuoteTotals.totalNetPrice)}
                           </div>
                           <div className="text-sm text-emerald-600">Net Toplam</div>
+                          <div className="text-xs text-slate-500 italic mt-1">
+                            (€ {formatPrice(calculateQuoteTotals.totalNetPrice / (exchangeRates.EUR || 48.5))} EUR)
+                          </div>
                         </div>
                       </div>
                       
