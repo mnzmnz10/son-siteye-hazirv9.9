@@ -3254,10 +3254,9 @@ class PDFPackageGenerator(PDFQuoteGenerator):
         
         # Euro karşılığı
         try:
-            from services.currency_service import CurrencyService
+            # Use global currency_service instance
             import asyncio
             
-            currency_service = CurrencyService()
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
             rates = loop.run_until_complete(currency_service.get_exchange_rates())
