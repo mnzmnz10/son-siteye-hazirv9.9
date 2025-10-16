@@ -3255,6 +3255,29 @@ class PDFPackageGenerator(PDFQuoteGenerator):
                                    textColor=colors.HexColor('#2F4B68')))
         ])
         
+        # Euro karşılığı
+        try:
+            from services.currency_service import CurrencyService
+            import asyncio
+            
+            currency_service = CurrencyService()
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            rates = loop.run_until_complete(currency_service.get_exchange_rates())
+            loop.close()
+            
+            eur_rate = float(rates.get('EUR', 48.5))
+            final_total_eur = final_total / eur_rate
+            
+            table_data.append([
+                Paragraph("<i>Euro Karşılığı</i>", 
+                         ParagraphStyle('ItalicGray', parent=self.data_style, textColor=colors.HexColor('#666666'))),
+                Paragraph(f"<i>€ {self._format_price_modern(final_total_eur)}</i>", 
+                         ParagraphStyle('ItalicGray', parent=self.data_style, textColor=colors.HexColor('#666666')))
+            ])
+        except Exception as e:
+            logger.warning(f"Could not calculate EUR equivalent: {e}")
+        
         # Tablo oluştur
         table = PDFTable(table_data, colWidths=[10*cm, 6*cm])
         table.setStyle(TableStyle([
