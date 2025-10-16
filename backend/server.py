@@ -2686,7 +2686,12 @@ class PDFQuoteGenerator:
         # Ürün satırları (Marka sütunu kaldırıldı)
         for product in products:
             quantity = product.get('quantity', 1)
-            unit_price = product.get('discounted_price_try', product.get('list_price_try', 0))
+            # PDF için özel fiyat varsa onu kullan, yoksa liste fiyatını kullan
+            # İndirimli fiyat gösterme durumu PDF'i etkilemez
+            if product.get('has_custom_price') and product.get('custom_price'):
+                unit_price = product.get('custom_price', 0)
+            else:
+                unit_price = product.get('list_price_try', 0)
             total_price = unit_price * quantity
             
             row = [
