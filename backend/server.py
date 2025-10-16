@@ -5281,19 +5281,19 @@ async def bulk_update_price(request: BulkUpdatePriceRequest):
 async def bulk_update_category(request: BulkUpdateCategoryRequest):
     """Bulk update product category"""
     try:
-        if not product_ids:
+        if not request.product_ids:
             raise HTTPException(status_code=400, detail="Ürün seçilmedi")
         
         # Verify category exists
-        if category_id:
-            category = await db.categories.find_one({"id": category_id})
+        if request.category_id:
+            category = await db.categories.find_one({"id": request.category_id})
             if not category:
                 raise HTTPException(status_code=404, detail="Kategori bulunamadı")
         
         # Update products
         result = await db.products.update_many(
-            {"id": {"$in": product_ids}},
-            {"$set": {"category_id": category_id if category_id else None}}
+            {"id": {"$in": request.product_ids}},
+            {"$set": {"category_id": request.category_id if request.category_id else None}}
         )
         
         return {
