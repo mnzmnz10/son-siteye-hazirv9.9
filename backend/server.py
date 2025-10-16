@@ -2770,6 +2770,28 @@ class PDFQuoteGenerator:
         net_total_text = f"<font size='14' color='{net_total_color}'><b>NET TOPLAM: ₺ {self._format_price_modern(net_total)}</b></font>"
         totals_content.append(Paragraph(net_total_text, self.price_style))
         
+        # Euro karşılığı - Güncel kurdan hesaplanmış
+        try:
+            from services.currency_service import CurrencyService
+            import asyncio
+            
+            # Get exchange rates
+            currency_service = CurrencyService()
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            rates = loop.run_until_complete(currency_service.get_exchange_rates())
+            loop.close()
+            
+            eur_rate = float(rates.get('EUR', 48.5))  # Default 48.5 if not available
+            net_total_eur = net_total / eur_rate
+            
+            euro_text = f"<font size='10' color='#666666'><i>(€ {self._format_price_modern(net_total_eur)} EUR)</i></font>"
+            totals_content.append(Paragraph(euro_text, self.price_style))
+        except Exception as e:
+            logger.warning(f"Could not calculate EUR equivalent: {e}")
+        
+        totals_content.append(Spacer(1, 4))
+        
         return totals_content
     
     def _create_modern_footer(self):
