@@ -3115,7 +3115,11 @@ class PDFPackageGenerator(PDFQuoteGenerator):
                     display_name += f"\n  📝 {product_notes.strip()}"
                 
                 if include_prices:
-                    unit_price = float(product.get('list_price_try', 0))
+                    # PDF için özel fiyat varsa onu kullan, yoksa liste fiyatını kullan
+                    if product.get('has_custom_price') and product.get('custom_price'):
+                        unit_price = float(product.get('custom_price', 0))
+                    else:
+                        unit_price = float(product.get('list_price_try', 0))
                     line_total = unit_price * quantity
                     
                     row = [
