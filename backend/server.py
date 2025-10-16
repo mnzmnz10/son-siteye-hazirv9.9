@@ -2772,14 +2772,8 @@ class PDFQuoteGenerator:
         
         # Euro karşılığı - Güncel kurdan hesaplanmış
         try:
-            # Use global currency_service instance
-            import asyncio
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            rates = loop.run_until_complete(currency_service.get_exchange_rates())
-            loop.close()
-            
-            eur_rate = float(rates.get('EUR', 48.5))  # Default 48.5 if not available
+            # Use cached exchange rates (no async needed)
+            eur_rate = float(currency_service._cached_rates.get('EUR', 48.5)) if currency_service._cached_rates else 48.5
             net_total_eur = net_total / eur_rate
             
             euro_text = f"<font size='10' color='#666666'><i>(€ {self._format_price_modern(net_total_eur)} EUR)</i></font>"
