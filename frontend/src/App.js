@@ -4315,15 +4315,6 @@ function App() {
                       <Upload className="w-4 h-4 mr-2" />
                       Excel Export
                     </Button>
-                    {selectedProductsForBulk.size === 0 ? (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={selectAllProducts}
-                      >
-                        Toplu Seç
-                      </Button>
-                    ) : null}
                     {selectedProducts.size > 0 && (
                       <>
                         <Button 
@@ -4343,13 +4334,6 @@ function App() {
                         </Button>
                       </>
                     )}
-                    <Button 
-                      variant="outline" 
-                      onClick={selectAllVisible}
-                      size="sm"
-                    >
-                      Tümünü Seç
-                    </Button>
                   </div>
                   <Dialog open={showAddProductDialog} onOpenChange={setShowAddProductDialog}>
                     <DialogTrigger asChild>
