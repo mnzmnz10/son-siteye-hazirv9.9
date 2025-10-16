@@ -4106,7 +4106,11 @@ function App() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => setShowPackageDiscountedPrices(!showPackageDiscountedPrices)}
+                            onClick={() => {
+                              console.log('Before toggle:', showPackageDiscountedPrices);
+                              setShowPackageDiscountedPrices(!showPackageDiscountedPrices);
+                              console.log('After toggle:', !showPackageDiscountedPrices);
+                            }}
                             className="p-2"
                             title={showPackageDiscountedPrices ? "Liste fiyatlarını göster" : "İndirimli fiyatları göster"}
                           >
