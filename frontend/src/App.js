@@ -4915,6 +4915,21 @@ function App() {
                                           <span className="text-gray-400 text-sm">-</span>
                                         )}
                                       </TableCell>
+                                      <TableCell className="w-16">
+                                        {/* Toplu işlem seçimi - Sağ tarafta */}
+                                        <Button
+                                          size="sm"
+                                          variant={selectedProductsForBulk.has(product.id) ? "default" : "outline"}
+                                          onClick={() => toggleProductSelectionForBulk(product.id)}
+                                          className={selectedProductsForBulk.has(product.id) ? "bg-blue-600 hover:bg-blue-700" : ""}
+                                        >
+                                          {selectedProductsForBulk.has(product.id) ? (
+                                            <Check className="w-4 h-4" />
+                                          ) : (
+                                            <Plus className="w-4 h-4" />
+                                          )}
+                                        </Button>
+                                      </TableCell>
                                       <TableCell className="w-24">
                                         <div className="flex gap-2">
                                           {isEditing ? (
