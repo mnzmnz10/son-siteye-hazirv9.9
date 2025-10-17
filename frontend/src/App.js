@@ -5474,95 +5474,84 @@ function App() {
                       ) : (
                         <div className="space-y-4">
                           {filteredQuotes.map((quote) => (
-                          <div key={quote.id} className="border rounded-lg p-4 hover:bg-slate-50">
+                          <div key={quote.id} className="border-2 border-blue-100 rounded-xl p-5 hover:border-blue-300 hover:shadow-md transition-all bg-white">
                             <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
                               <div className="flex-1">
-                                <h4 className="font-semibold text-lg">{quote.name}</h4>
-                                <p className="text-sm text-slate-600 mt-1">
-                                  {quote.products.length} ürün • %{quote.discount_percentage} indirim
+                                <h4 className="font-bold text-lg text-gray-900 mb-2">{quote.name}</h4>
+                                <div className="flex flex-wrap items-center gap-3 text-sm">
+                                  <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full font-medium">
+                                    {quote.products.length} ürün
+                                  </span>
+                                  <span className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full font-medium">
+                                    %{quote.discount_percentage} indirim
+                                  </span>
                                   {quote.labor_cost > 0 && (
-                                    <span className="text-green-600"> • ₺{formatPrice(quote.labor_cost)} işçilik</span>
+                                    <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full font-medium">
+                                      ₺{formatPrice(quote.labor_cost)} işçilik
+                                    </span>
                                   )}
-                                </p>
-                                <div className="flex flex-wrap items-center gap-2 lg:gap-4 mt-2 text-sm text-slate-600">
-                                  <span>Ara Toplam: ₺{formatPrice(quote.total_discounted_price)}</span>
-                                  {quote.labor_cost > 0 && (
-                                    <span className="text-green-600">İşçilik: ₺{formatPrice(quote.labor_cost)}</span>
-                                  )}
-                                  <span className="font-semibold">Net Toplam: ₺{formatPrice(quote.total_net_price)}</span>
-                                  <span className="text-xs">{new Date(quote.created_at).toLocaleDateString('tr-TR')}</span>
+                                </div>
+                                <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-slate-600">
+                                  <span className="font-semibold text-gray-900 text-base">
+                                    Net: ₺{formatPrice(quote.total_net_price)}
+                                  </span>
+                                  <span className="text-xs text-slate-500">
+                                    {new Date(quote.created_at).toLocaleDateString('tr-TR')}
+                                  </span>
                                 </div>
                               </div>
-                              <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
-                                {/* Mobilde dikey, desktop'ta yatay düzen */}
-                                <div className="flex flex-col sm:flex-row gap-2 flex-1">
-                                  <Button
-                                    variant="secondary"
-                                    size="sm"
-                                    onClick={() => {
-                                      try {
-                                        console.log('🔍 Quote loading started:', quote.name);
-                                        console.log('🔍 Quote products:', quote.products);
-                                        
-                                        // Teklifi önce yükle - YENİ Map instance'ları oluştur
-                                        const productIds = new Map();
-                                        const productData = new Map();
-                                        quote.products.forEach(p => {
-                                          console.log('🔍 Loading product:', p.id, 'quantity:', p.quantity);
-                                          productIds.set(p.id, p.quantity || 1); // Gerçek quantity'yi kullan
-                                          productData.set(p.id, p); // Ürün bilgisini de kaydet
-                                        });
-                                        
-                                        console.log('🔍 ProductIds Map:', productIds);
-                                        console.log('🔍 ProductData Map:', productData);
-                                        
-                                        // State'leri tamamen yeni Map'lerle güncelle (React re-render için)
-                                        setSelectedProducts(new Map(productIds));
-                                        setSelectedProductsData(new Map(productData));
-                                        setQuoteDiscount(quote.discount_percentage);
-                                        setQuoteLaborCost(quote.labor_cost || 0);
-                                        setQuoteNotes(quote.notes || ''); // Teklif notlarını yükle
-                                        setLoadedQuote({...quote}); // Yeni object reference
-                                        setQuoteName(quote.name);
-                                        
-                                        console.log('🔍 States updated with new Map instances, switching to quotes tab');
-                                        
-                                        // Quotes sekmesine geç ki düzenleme arayüzü görünsün
-                                        setActiveTab('quotes');
-                                        
-                                        console.log('🔍 Quote loading completed successfully');
-                                        toast.success(`"${quote.name}" teklifi düzenleme için yüklendi`);
-                                        
-                                      } catch (error) {
-                                        console.error('Teklif yükleme hatası:', error);
-                                        toast.error('Teklif yükleme işlemi başarısız oldu');
-                                      }
-                                    }}
-                                    className="bg-green-100 text-green-800 hover:bg-green-200 flex-1 sm:flex-none"
-                                    title={`"${quote.name}" teklifini önizle`}
-                                  >
-                                    📝 Teklifi Önizle
-                                  </Button>
+                              <div className="flex flex-wrap gap-2">
+                                <Button
+                                  variant="secondary"
+                                  size="sm"
+                                  onClick={() => {
+                                    try {
+                                      const productIds = new Map();
+                                      const productData = new Map();
+                                      quote.products.forEach(p => {
+                                        productIds.set(p.id, p.quantity || 1);
+                                        productData.set(p.id, p);
+                                      });
+                                      
+                                      setSelectedProducts(new Map(productIds));
+                                      setSelectedProductsData(new Map(productData));
+                                      setQuoteDiscount(quote.discount_percentage);
+                                      setQuoteLaborCost(quote.labor_cost || 0);
+                                      setQuoteNotes(quote.notes || '');
+                                      setLoadedQuote({...quote});
+                                      setQuoteName(quote.name);
+                                      setQuoteSubTab('create');
+                                      
+                                      toast.success(`"${quote.name}" teklifi düzenleme için yüklendi`);
+                                    } catch (error) {
+                                      toast.error('Teklif yükleme işlemi başarısız oldu');
+                                    }
+                                  }}
+                                  className="bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-300"
+                                  title={`"${quote.name}" teklifini önizle`}
+                                >
+                                  <Eye className="w-4 h-4 mr-1" />
+                                  Önizle
+                                </Button>
                                   
-                                  <Button
-                                    variant="default"
-                                    size="sm"
-                                    onClick={() => {
-                                      // PDF indir
-                                      const pdfUrl = `${API}/quotes/${quote.id}/pdf`;
-                                      const link = document.createElement('a');
-                                      link.href = pdfUrl;
-                                      link.download = `${quote.name}.pdf`;
-                                      document.body.appendChild(link);
-                                      link.click();
-                                      document.body.removeChild(link);
-                                      toast.success('PDF indiriliyor...');
-                                    }}
-                                    className="bg-green-600 hover:bg-green-700 flex-1 sm:flex-none"
-                                  >
-                                    <Download className="w-4 h-4 mr-1" />
-                                    PDF İndir
-                                  </Button>
+                                <Button
+                                  variant="default"
+                                  size="sm"
+                                  onClick={() => {
+                                    const pdfUrl = `${API}/quotes/${quote.id}/pdf`;
+                                    const link = document.createElement('a');
+                                    link.href = pdfUrl;
+                                    link.download = `${quote.name}.pdf`;
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    document.body.removeChild(link);
+                                    toast.success('PDF indiriliyor...');
+                                  }}
+                                  className="bg-emerald-600 hover:bg-emerald-700"
+                                >
+                                  <Download className="w-4 h-4 mr-1" />
+                                  PDF
+                                </Button>
                                 </div>
                                 
                                 <div className="flex flex-col sm:flex-row gap-2">
