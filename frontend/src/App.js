@@ -1226,6 +1226,9 @@ function App() {
   }, [categoryDialogSearchQuery, showCategoryProductDialog]);
 
   const toggleProductSelection = (productId, quantity = 1) => {
+    console.log('🔄 toggleProductSelection çağrıldı:', { productId, quantity });
+    console.log('📊 Mevcut selectedProducts:', Array.from(selectedProducts.entries()));
+    
     const newSelected = new Map(selectedProducts);
     const newSelectedData = new Map(selectedProductsData);
     
@@ -1237,9 +1240,11 @@ function App() {
     
     if (newSelected.has(productId)) {
       if (quantity === 0) {
+        console.log('❌ Ürün siliniyor:', productId);
         newSelected.delete(productId);
         newSelectedData.delete(productId);
       } else {
+        console.log('✏️ Ürün miktarı güncelleniyor:', productId, quantity);
         newSelected.set(productId, quantity);
         if (product) {
           newSelectedData.set(productId, product);
@@ -1247,10 +1252,14 @@ function App() {
       }
     } else {
       if (quantity > 0 && product) {
+        console.log('➕ Yeni ürün ekleniyor:', productId);
         newSelected.set(productId, quantity);
         newSelectedData.set(productId, product);
       }
     }
+    
+    console.log('📊 Yeni selectedProducts:', Array.from(newSelected.entries()));
+    console.log('📊 Seçili ürün sayısı:', newSelected.size);
     
     setSelectedProducts(newSelected);
     setSelectedProductsData(newSelectedData);
