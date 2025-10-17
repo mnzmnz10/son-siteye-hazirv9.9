@@ -13,7 +13,7 @@ from backend_test import KaravanAPITester
 def main():
     """Run only the package supplies functionality test"""
     print("🚀 Starting Package Supplies Functionality Test...")
-    print("🌐 Testing API at: https://all-products-view.preview.emergentagent.com/api")
+    print("🌐 Testing API at: https://shopstack-44.preview.emergentagent.com/api")
     print("=" * 80)
     
     tester = KaravanAPITester()
