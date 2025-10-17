@@ -5243,21 +5243,19 @@ function App() {
                       </div>
                     </div>
 
-                    {/* Action Buttons - Yeni Tasarım */}
-                    <div className="flex gap-3">
-                      {/* Teklifi Kaydet Butonu */}
+                    {/* Action Buttons - Modern Blue Theme */}
+                    <div className="flex flex-wrap gap-3 pt-4 border-t-2 border-blue-100">
                       <Button 
                         onClick={saveQuote}
                         disabled={selectedProducts.size === 0}
-                        className="bg-blue-600 hover:bg-blue-700"
+                        className="bg-blue-600 hover:bg-blue-700 flex-1 min-w-[200px] h-12 text-base font-semibold shadow-md"
                       >
-                        <Save className="w-4 h-4 mr-2" />
+                        <Save className="w-5 h-5 mr-2" />
                         {loadedQuote && (loadedQuote.name === quoteName || quoteName === '') 
                           ? 'Teklifi Güncelle' 
                           : 'Teklifi Kaydet'}
                       </Button>
 
-                      {/* Ana PDF İndirme Butonu */}
                       <Button 
                         onClick={async () => {
                           try {
