@@ -5064,7 +5064,44 @@ function App() {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={clearSelection}
+                              onClick={async () => {
+                                // Eğer yüklü bir teklif varsa ve değişiklik yapıldıysa otomatik kaydet
+                                if (loadedQuote && loadedQuote.id) {
+                                  try {
+                                    const selectedProductData = getSelectedProductsData().map(p => ({
+                                      id: p.id,
+                                      quantity: p.quantity || 1
+                                    }));
+                                    
+                                    console.log('🔄 Teklif kapatılmadan önce otomatik güncelleniyor...');
+                                    
+                                    const updateResponse = await fetch(`${API}/quotes/${loadedQuote.id}`, {
+                                      method: 'PUT',
+                                      headers: {
+                                        'Content-Type': 'application/json',
+                                      },
+                                      body: JSON.stringify({
+                                        name: loadedQuote.name,
+                                        customer_id: selectedQuoteCustomer || null,
+                                        labor_cost: parseFloat(quoteLaborCost) || 0,
+                                        discount_percentage: parseFloat(quoteDiscount) || 0,
+                                        products: selectedProductData,
+                                        notes: quoteNotes.trim() || ''
+                                      })
+                                    });
+                                    
+                                    if (updateResponse.ok) {
+                                      await fetchQuotes();
+                                      toast.success('Değişiklikler kaydedildi');
+                                    }
+                                  } catch (error) {
+                                    console.error('Otomatik kaydetme hatası:', error);
+                                  }
+                                }
+                                
+                                // Sonra teklifi kapat
+                                clearSelection();
+                              }}
                               className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 border-red-200"
                               title="Teklifi Kapat"
                             >
