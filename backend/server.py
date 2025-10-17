@@ -2818,7 +2818,9 @@ class PDFQuoteGenerator:
         # İndirim (eğer varsa)  
         discount_percentage = quote_data.get('discount_percentage', 0)
         if discount_percentage > 0:
-            discount_amount = quote_data.get('total_discounted_price', 0) - quote_data.get('total_net_price', 0) + quote_data.get('labor_cost', 0)
+            # Doğru indirim hesaplaması: liste fiyatının yüzdesi
+            total_list_price = quote_data.get('total_list_price', 0)
+            discount_amount = total_list_price * (discount_percentage / 100)
             discount_text = f"İndirim (%{discount_percentage}): <font color='#dc2626'>-₺ {self._format_price_modern(discount_amount)}</font>"
             totals_content.append(Paragraph(discount_text, self.normal_style))
             totals_content.append(Spacer(1, 4))
