@@ -4997,30 +4997,30 @@ function App() {
                           </Button>
                         </div>
                       </div>
-                      <div className="grid gap-2">
+                      <div className="grid gap-2 max-h-60 overflow-y-auto">
                         {getSelectedProductsData().slice(0, 5).map((product) => {
                           const company = companies.find(c => c.id === product.company_id);
                           return (
-                            <div key={product.id} className="flex items-center justify-between bg-white rounded p-2 text-sm">
-                              <div className="flex items-center gap-3">
+                            <div key={product.id} className="flex items-center justify-between bg-white rounded-lg p-3 text-sm shadow-sm border border-blue-100 hover:border-blue-300 transition-all">
+                              <div className="flex items-center gap-3 flex-1">
                                 {product.image_url && (
                                   <img 
                                     src={product.image_url} 
                                     alt={product.name}
-                                    className="w-8 h-8 object-cover rounded cursor-pointer hover:opacity-75 transition-opacity"
+                                    className="w-12 h-12 object-cover rounded-lg cursor-pointer hover:opacity-75 transition-opacity border border-gray-200"
                                     onError={(e) => {e.target.style.display = 'none'}}
                                     onClick={() => openImagePreview(product.image_url, product.name)}
                                     title="Görseli büyük boyutta görüntülemek için tıklayın"
                                   />
                                 )}
-                                <div>
-                                  <div className="font-medium">{product.name}</div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="font-semibold text-gray-900 truncate">{product.name}</div>
                                   <div className="text-slate-500 text-xs">{company?.name}</div>
                                 </div>
                               </div>
-                              <div className="flex items-center gap-3">
+                              <div className="flex items-center gap-4">
                                 <div className="flex items-center gap-2">
-                                  <span className="text-xs text-slate-600">Adet:</span>
+                                  <span className="text-xs text-slate-600 font-medium">Adet:</span>
                                   <input
                                     type="number"
                                     min="1"
@@ -5029,25 +5029,20 @@ function App() {
                                       const quantity = parseInt(e.target.value) || 1;
                                       toggleProductSelection(product.id, quantity);
                                     }}
-                                    className="w-16 px-2 py-1 text-sm border rounded"
+                                    className="w-16 px-2 py-1.5 text-sm border border-blue-200 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                   />
                                 </div>
-                                <div className="text-right">
+                                <div className="text-right min-w-[120px]">
                                   {showQuoteDiscountedPrices && product.discounted_price_try ? (
-                                    // İndirimli fiyat varsa ve gösterilmesi isteniyorsa
                                     <>
-                                      <div className="font-medium text-green-600">₺ {formatPrice((product.discounted_price_try || 0) * (product.quantity || 1))}</div>
+                                      <div className="font-bold text-green-600">₺ {formatPrice((product.discounted_price_try || 0) * (product.quantity || 1))}</div>
                                       <div className="text-xs text-slate-500 line-through">
-                                        ₺ {formatPrice((product.list_price_try || 0) * (product.quantity || 1))} (Liste)
-                                      </div>
-                                      <div className="text-xs text-green-600">
-                                        ₺ {formatPrice(product.discounted_price_try || 0)} × {product.quantity || 1}
+                                        ₺ {formatPrice((product.list_price_try || 0) * (product.quantity || 1))}
                                       </div>
                                     </>
                                   ) : (
-                                    // Liste fiyatı veya indirimli fiyat gizliyse
                                     <>
-                                      <div className="font-medium">₺ {formatPrice((product.list_price_try || 0) * (product.quantity || 1))}</div>
+                                      <div className="font-bold text-blue-900">₺ {formatPrice((product.list_price_try || 0) * (product.quantity || 1))}</div>
                                       <div className="text-xs text-slate-500">
                                         ₺ {formatPrice(product.list_price_try || 0)} × {product.quantity || 1}
                                       </div>
@@ -5058,7 +5053,7 @@ function App() {
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => toggleProductSelection(product.id, 0)}
-                                  className="text-red-600 hover:text-red-800 hover:bg-red-50"
+                                  className="text-red-600 hover:text-red-800 hover:bg-red-50 p-1.5"
                                 >
                                   <X className="w-4 h-4" />
                                 </Button>
@@ -5067,7 +5062,7 @@ function App() {
                           );
                         })}
                         {selectedProducts.size > 5 && (
-                          <div className="text-center text-sm text-slate-500 py-2">
+                          <div className="text-center text-sm text-slate-500 py-2 bg-blue-50 rounded-lg">
                             ... ve {selectedProducts.size - 5} ürün daha
                           </div>
                         )}
