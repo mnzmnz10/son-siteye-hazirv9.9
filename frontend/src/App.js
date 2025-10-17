@@ -5503,7 +5503,44 @@ function App() {
                       
                       <Button 
                         variant="outline" 
-                        onClick={clearSelection}
+                        onClick={async () => {
+                          // Eğer yüklü bir teklif varsa ve değişiklik yapıldıysa otomatik kaydet
+                          if (loadedQuote && loadedQuote.id) {
+                            try {
+                              const selectedProductData = getSelectedProductsData().map(p => ({
+                                id: p.id,
+                                quantity: p.quantity || 1
+                              }));
+                              
+                              console.log('🔄 Teklif temizlenmeden önce otomatik güncelleniyor...');
+                              
+                              const updateResponse = await fetch(`${API}/quotes/${loadedQuote.id}`, {
+                                method: 'PUT',
+                                headers: {
+                                  'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                  name: loadedQuote.name,
+                                  customer_id: selectedQuoteCustomer || null,
+                                  labor_cost: parseFloat(quoteLaborCost) || 0,
+                                  discount_percentage: parseFloat(quoteDiscount) || 0,
+                                  products: selectedProductData,
+                                  notes: quoteNotes.trim() || ''
+                                })
+                              });
+                              
+                              if (updateResponse.ok) {
+                                await fetchQuotes();
+                                toast.success('Değişiklikler kaydedildi');
+                              }
+                            } catch (error) {
+                              console.error('Otomatik kaydetme hatası:', error);
+                            }
+                          }
+                          
+                          // Sonra temizle
+                          clearSelection();
+                        }}
                         className="border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700 min-w-[140px] h-12 text-base font-semibold"
                       >
                         <X className="w-5 h-5 mr-2" />
