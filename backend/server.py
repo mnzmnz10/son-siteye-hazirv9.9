@@ -2278,13 +2278,18 @@ async def update_quote(quote_id: str, quote_update: Dict[str, Any]):
         
         # Ürün listesi güncellenirse - YENİ EKLENDİ
         if "products" in quote_update:
+            print("🔄 Ürün listesi güncelleniyor...")
             products_data = quote_update["products"]
+            print(f"📦 Frontend'den gelen products_data: {products_data}")
             
             # Ürün bilgilerini veritabanından al
             product_ids = [p["id"] for p in products_data]
+            print(f"📦 Aranacak product_ids: {product_ids}")
+            
             db_products = await db.products.find(
                 {"id": {"$in": product_ids}, "status": "active"}
             ).to_list(length=None)
+            print(f"📦 Veritabanından bulunan ürün sayısı: {len(db_products)}")
             
             # Her ürün için detayları ekle
             processed_products = []
@@ -2314,6 +2319,11 @@ async def update_quote(quote_id: str, quote_update: Dict[str, Any]):
                         "discounted_price_try": discounted_price,
                         "custom_price": custom_price
                     })
+                else:
+                    print(f"⚠️ Ürün bulunamadı: {product_id}")
+            
+            print(f"✅ İşlenen ürün sayısı: {len(processed_products)}")
+            print(f"💰 Toplam liste fiyatı: {total_list_price}")
             
             # Güncellenen ürün listesini ve toplamları ekle
             update_data["products"] = processed_products
