@@ -4895,17 +4895,21 @@ function App() {
             </Card>
           </TabsContent>
 
-          {/* Quotes Tab */}
+          {/* Quotes Tab - Modern Redesigned */}
           <TabsContent value="quotes" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="w-5 h-5" />
-                  Teklif Yönetimi
+            <Card className="border-t-4 border-t-blue-500">
+              <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b">
+                <CardTitle className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                    <FileText className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-xl font-bold text-blue-900">Teklif Yönetimi</div>
+                    <div className="text-sm font-normal text-blue-600">Hızlı ve profesyonel teklif oluşturun</div>
+                  </div>
                 </CardTitle>
-                <CardDescription>Seçili ürünlerden teklif oluşturun ve yönetin</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-0">
                 {selectedProducts.size > 0 ? (
                   <div className="space-y-6">
                     {/* Selected Products Summary */}
