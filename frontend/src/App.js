@@ -1271,6 +1271,29 @@ function App() {
     setSelectedProductsData(newSelectedData);
   };
 
+  // Hızlı ekleme için ürünleri filtrele
+  const getQuickAddProducts = () => {
+    let filteredProducts = products;
+    
+    // Kategori filtresi
+    if (quickAddCategory !== 'all') {
+      filteredProducts = filteredProducts.filter(p => p.category_id === quickAddCategory);
+    }
+    
+    // Arama filtresi
+    if (quickAddSearch.trim()) {
+      const searchLower = quickAddSearch.toLowerCase();
+      filteredProducts = filteredProducts.filter(p => 
+        p.name?.toLowerCase().includes(searchLower)
+      );
+    }
+    
+    // Zaten seçili olanları gösterme
+    filteredProducts = filteredProducts.filter(p => !selectedProducts.has(p.id));
+    
+    return filteredProducts.slice(0, 10); // Maksimum 10 sonuç
+  };
+
   const clearSelection = () => {
     setSelectedProducts(new Map());
     setSelectedProductsData(new Map());
