@@ -136,6 +136,9 @@ function App() {
   const [bulkPriceApplyTo, setBulkPriceApplyTo] = useState('list_price'); // list_price or discounted_price
   const [bulkCategoryId, setBulkCategoryId] = useState('');
   
+  // Kategori ürün gösterimi için state
+  const [expandedCategories, setExpandedCategories] = useState(new Set()); // Tüm ürünleri gösteren kategoriler
+  
   // Upload History için state'ler
   const [showUploadHistoryDialog, setShowUploadHistoryDialog] = useState(false);
   const [selectedCompanyForHistory, setSelectedCompanyForHistory] = useState(null);
