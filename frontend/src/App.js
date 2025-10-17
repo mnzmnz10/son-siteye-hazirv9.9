@@ -4915,6 +4915,44 @@ function App() {
                               </TableBody>
                             </Table>
                           </div>
+                          
+                          {/* Diğer Ürünleri Göster Butonu */}
+                          {hasMoreProducts && !isExpanded && (
+                            <div className="flex justify-center pt-3 border-t">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  const newExpanded = new Set(expandedCategories);
+                                  newExpanded.add(categoryId);
+                                  setExpandedCategories(newExpanded);
+                                }}
+                                className="bg-blue-50 text-blue-700 border-blue-300 hover:bg-blue-100"
+                              >
+                                <Plus className="w-4 h-4 mr-2" />
+                                Diğer Ürünleri Göster ({hiddenCount} ürün)
+                              </Button>
+                            </div>
+                          )}
+                          
+                          {/* Daha Az Göster Butonu */}
+                          {isExpanded && (
+                            <div className="flex justify-center pt-3 border-t">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  const newExpanded = new Set(expandedCategories);
+                                  newExpanded.delete(categoryId);
+                                  setExpandedCategories(newExpanded);
+                                }}
+                                className="bg-gray-50 text-gray-700 border-gray-300 hover:bg-gray-100"
+                              >
+                                <X className="w-4 h-4 mr-2" />
+                                Daha Az Göster
+                              </Button>
+                            </div>
+                          )}
                         </div>
                       );
                     });
