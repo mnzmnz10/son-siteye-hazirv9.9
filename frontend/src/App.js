@@ -1671,7 +1671,6 @@ function App() {
   const [packageProductSearch, setPackageProductSearch] = useState('');
   const [supplySearch, setSupplySearch] = useState('');
   const [supplyProducts, setSupplyProducts] = useState([]);
-  const [expandedCategories, setExpandedCategories] = useState(new Set());
   const [showSuppliesSection, setShowSuppliesSection] = useState(false); // Sarf malzemesi bölümü açık/kapalı
   
   // Category sorting states
