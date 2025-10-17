@@ -106,6 +106,12 @@ function App() {
   const [showQuoteDiscountedPrices, setShowQuoteDiscountedPrices] = useState(false); // Teklif indirimli fiyat görünürlüğü - Varsayılan KAPALI
   const [quoteSubTab, setQuoteSubTab] = useState('create'); // Teklif alt sekmesi: 'create' veya 'list'
   
+  // Hızlı ürün ekleme için state'ler
+  const [quickAddSearch, setQuickAddSearch] = useState('');
+  const [quickAddCategory, setQuickAddCategory] = useState('all');
+  const [quickAddQuantity, setQuickAddQuantity] = useState(1);
+  const [showQuickAddDropdown, setShowQuickAddDropdown] = useState(false);
+  
   // Kategori ürün atama için state'ler
   const [showCategoryProductDialog, setShowCategoryProductDialog] = useState(false);
   const [selectedCategoryForProducts, setSelectedCategoryForProducts] = useState(null);
