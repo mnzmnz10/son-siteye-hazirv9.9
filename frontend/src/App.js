@@ -1311,7 +1311,7 @@ function App() {
           discount_percentage: parseFloat(quoteDiscount) || 0,
           labor_cost: parseFloat(quoteLaborCost) || 0,
           products: selectedProductData,
-          notes: quoteLaborCost > 0 ? `İşçilik maliyeti: ₺${formatPrice(quoteLaborCost)}` : null
+          notes: quoteNotes.trim() || ''
         };
         
         const createResponse = await fetch(`${API}/quotes`, {
