@@ -2287,7 +2287,7 @@ async def update_quote(quote_id: str, quote_update: Dict[str, Any]):
             print(f"📦 Aranacak product_ids: {product_ids}")
             
             db_products = await db.products.find(
-                {"id": {"$in": product_ids}, "status": "active"}
+                {"id": {"$in": product_ids}}
             ).to_list(length=None)
             print(f"📦 Veritabanından bulunan ürün sayısı: {len(db_products)}")
             
