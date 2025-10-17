@@ -5040,44 +5040,6 @@ function App() {
                       />
                     </div>
 
-                    {/* Müşteri Seçimi Bölümü */}
-                    <div className="bg-gradient-to-br from-pink-50 to-purple-100 border-2 border-pink-300 rounded-lg p-4 shadow-md">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 bg-pink-500 text-white rounded-full flex items-center justify-center">
-                            <Users className="w-3 h-3" />
-                          </div>
-                          <span className="font-medium text-pink-800">Müşteri</span>
-                        </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            resetCustomerForm();
-                            setEditingCustomer(null);
-                            setShowQuickCustomerModal(true);
-                          }}
-                          className="text-xs"
-                        >
-                          <Plus className="w-3 h-3 mr-1" />
-                          Yeni Müşteri
-                        </Button>
-                      </div>
-                      <select
-                        value={selectedQuoteCustomer}
-                        onChange={(e) => setSelectedQuoteCustomer(e.target.value)}
-                        className="w-full px-3 py-2 border border-pink-300 rounded-md bg-white"
-                      >
-                        <option value="">Müşteri seçin (opsiyonel)</option>
-                        {customers.map((customer) => (
-                          <option key={customer.id} value={customer.id}>
-                            {customer.name} {customer.surname} 
-                            {customer.company && ` - ${customer.company}`}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
                     {/* İndirim Bölümü - Küçültülmüş */}
                     <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
                       <div className="flex items-center justify-between">
