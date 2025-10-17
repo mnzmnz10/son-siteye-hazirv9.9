@@ -4503,6 +4503,37 @@ function App() {
                       const category = categories.find(c => c.id === categoryId);
                       const categoryName = category ? category.name : 'Kategorisiz Ürünler';
                       const categoryColor = category ? category.color : '#64748b';
+                      
+                      // Favori ürünleri ve diğer ürünleri ayır
+                      const favoriteProducts = categoryProducts.filter(p => p.is_favorite);
+                      const nonFavoriteProducts = categoryProducts.filter(p => !p.is_favorite);
+                      
+                      // Gösterilecek ürünleri belirle
+                      let visibleProducts;
+                      let hasMoreProducts = false;
+                      const isExpanded = expandedCategories.has(categoryId);
+                      
+                      if (isExpanded) {
+                        // Kategori genişletilmişse tüm ürünleri göster
+                        visibleProducts = categoryProducts;
+                      } else {
+                        // Favori sayısına göre gösterim mantığı
+                        if (favoriteProducts.length === 0) {
+                          // Favori yoksa ilk 5 ürünü göster
+                          visibleProducts = categoryProducts.slice(0, 5);
+                          hasMoreProducts = categoryProducts.length > 5;
+                        } else if (favoriteProducts.length >= 5) {
+                          // 5 veya daha fazla favori varsa tüm favorileri göster
+                          visibleProducts = favoriteProducts;
+                          hasMoreProducts = nonFavoriteProducts.length > 0;
+                        } else {
+                          // 5'ten az favori varsa sadece favorileri göster
+                          visibleProducts = favoriteProducts;
+                          hasMoreProducts = nonFavoriteProducts.length > 0;
+                        }
+                      }
+                      
+                      const hiddenCount = categoryProducts.length - visibleProducts.length;
 
                       return (
                         <div key={categoryId} className="space-y-4">
