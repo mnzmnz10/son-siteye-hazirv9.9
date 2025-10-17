@@ -5164,7 +5164,89 @@ function App() {
                           </Button>
                         </div>
                       </div>
-                      <div className="grid gap-2 max-h-96 overflow-y-auto">
+                      
+                      {/* Hızlı Ürün Ekleme - Kompakt */}
+                      <div className="border-t-2 border-blue-200 pt-4 mt-3">
+                        <div className="flex items-center gap-3">
+                          {/* Kategori Seçimi */}
+                          <select
+                            value={quickAddCategory}
+                            onChange={(e) => setQuickAddCategory(e.target.value)}
+                            className="px-3 py-2 border border-blue-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                          >
+                            <option value="all">Tüm Kategoriler</option>
+                            {categories.map(cat => (
+                              <option key={cat.id} value={cat.id}>{cat.name}</option>
+                            ))}
+                          </select>
+                          
+                          {/* Arama Kutusu */}
+                          <div className="flex-1 relative">
+                            <input
+                              type="text"
+                              placeholder="Ürün ara ve ekle..."
+                              value={quickAddSearch}
+                              onChange={(e) => {
+                                setQuickAddSearch(e.target.value);
+                                setShowQuickAddDropdown(e.target.value.length > 0);
+                              }}
+                              onFocus={() => quickAddSearch.length > 0 && setShowQuickAddDropdown(true)}
+                              className="w-full px-4 py-2 border border-blue-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                            <Search className="absolute right-3 top-2.5 w-4 h-4 text-gray-400" />
+                            
+                            {/* Dropdown Sonuçlar */}
+                            {showQuickAddDropdown && (
+                              <div className="absolute z-50 w-full mt-1 bg-white border-2 border-blue-300 rounded-lg shadow-lg max-h-64 overflow-y-auto">
+                                {getQuickAddProducts().length > 0 ? (
+                                  getQuickAddProducts().map(product => {
+                                    const company = companies.find(c => c.id === product.company_id);
+                                    return (
+                                      <div
+                                        key={product.id}
+                                        className="flex items-center justify-between p-2 hover:bg-blue-50 cursor-pointer border-b last:border-b-0"
+                                        onClick={() => {
+                                          toggleProductSelection(product.id, quickAddQuantity);
+                                          setQuickAddSearch('');
+                                          setShowQuickAddDropdown(false);
+                                          setQuickAddQuantity(1);
+                                          toast.success(`${product.name} eklendi`);
+                                        }}
+                                      >
+                                        <div className="flex-1">
+                                          <div className="text-sm font-medium text-gray-900">{product.name}</div>
+                                          <div className="text-xs text-gray-500">{company?.name}</div>
+                                        </div>
+                                        <div className="text-sm font-bold text-blue-700">
+                                          ₺{formatPrice(product.list_price_try || 0)}
+                                        </div>
+                                      </div>
+                                    );
+                                  })
+                                ) : (
+                                  <div className="p-3 text-sm text-gray-500 text-center">
+                                    Ürün bulunamadı
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Adet Girişi */}
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-700">Adet:</span>
+                            <input
+                              type="number"
+                              min="1"
+                              value={quickAddQuantity}
+                              onChange={(e) => setQuickAddQuantity(parseInt(e.target.value) || 1)}
+                              className="w-16 px-2 py-2 border border-blue-300 rounded-lg text-sm text-center focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="grid gap-2 max-h-96 overflow-y-auto mt-4">
                         {getSelectedProductsData().map((product) => {
                           const company = companies.find(c => c.id === product.company_id);
                           return (
