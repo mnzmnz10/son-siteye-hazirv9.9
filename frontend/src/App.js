@@ -4911,7 +4911,52 @@ function App() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-0">
-                {selectedProducts.size > 0 ? (
+                {/* Internal Tab System */}
+                <div className="border-b bg-white">
+                  <div className="flex">
+                    <button
+                      className={`px-6 py-3 font-medium transition-all ${
+                        quoteSubTab === 'create'
+                          ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
+                          : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'
+                      }`}
+                      onClick={() => setQuoteSubTab('create')}
+                    >
+                      <div className="flex items-center gap-2">
+                        <FileText className="w-4 h-4" />
+                        <span>Yeni Teklif</span>
+                        {selectedProducts.size > 0 && (
+                          <span className="ml-1 px-2 py-0.5 text-xs bg-blue-600 text-white rounded-full">
+                            {selectedProducts.size}
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                    <button
+                      className={`px-6 py-3 font-medium transition-all ${
+                        quoteSubTab === 'list'
+                          ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
+                          : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'
+                      }`}
+                      onClick={() => setQuoteSubTab('list')}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Archive className="w-4 h-4" />
+                        <span>Tekliflerim</span>
+                        {quotes.length > 0 && (
+                          <span className="ml-1 px-2 py-0.5 text-xs bg-gray-600 text-white rounded-full">
+                            {quotes.length}
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Create Quote Tab Content */}
+                {quoteSubTab === 'create' && (
+                  <div className="p-6">
+                    {selectedProducts.size > 0 ? (
                   <div className="space-y-6">
                     {/* Selected Products Summary */}
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
