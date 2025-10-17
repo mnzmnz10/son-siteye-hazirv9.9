@@ -4526,9 +4526,16 @@ function App() {
                           visibleProducts = favoriteProducts;
                           hasMoreProducts = nonFavoriteProducts.length > 0;
                         } else {
-                          // 5'ten az favori varsa sadece favorileri göster
-                          visibleProducts = favoriteProducts;
-                          hasMoreProducts = nonFavoriteProducts.length > 0;
+                          // 5'ten az favori var
+                          if (categoryProducts.length >= 5) {
+                            // Toplam ürün 5 veya daha fazla ise, en az 5 ürün göster (favori + favori olmayan)
+                            visibleProducts = [...favoriteProducts, ...nonFavoriteProducts].slice(0, 5);
+                            hasMoreProducts = categoryProducts.length > 5;
+                          } else {
+                            // Toplam ürün 5'ten az ise, tüm ürünleri göster
+                            visibleProducts = categoryProducts;
+                            hasMoreProducts = false;
+                          }
                         }
                       }
                       
