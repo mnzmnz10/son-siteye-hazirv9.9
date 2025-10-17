@@ -5412,10 +5412,56 @@ function App() {
                 {/* List Quotes Tab Content */}
                 {quoteSubTab === 'list' && (
                   <div className="p-6">
-                      {filteredQuotes.length === 0 ? (
-                        <div className="text-center py-8 text-slate-500">
-                          <FileText className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                          <p>"{quoteSearchTerm}" araması için sonuç bulunamadı</p>
+                    {/* Search and Stats Header */}
+                    <div className="mb-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <h3 className="text-xl font-bold text-gray-900">Kayıtlı Teklifler</h3>
+                          <p className="text-sm text-gray-600 mt-1">
+                            {quotes.length} teklif
+                            {filteredQuotes.length !== quotes.length && ` (${filteredQuotes.length} sonuç gösteriliyor)`}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      {/* Search Box */}
+                      <div className="relative">
+                        <input
+                          type="text"
+                          placeholder="Teklif adı ile ara..."
+                          value={quoteSearchTerm}
+                          onChange={(e) => handleQuoteSearch(e.target.value)}
+                          className="w-full px-4 py-3 pl-10 border-2 border-blue-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+                        />
+                        <svg className="w-5 h-5 text-gray-400 absolute left-3 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                      </div>
+                    </div>
+
+                    {/* Quote List */}
+                    {quotes.length === 0 ? (
+                      <div className="text-center py-16">
+                        <div className="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <FileText className="w-12 h-12 text-blue-400" />
+                        </div>
+                        <h3 className="text-xl font-bold mb-2 text-gray-900">Henüz Teklif Yok</h3>
+                        <p className="text-sm mb-6 text-gray-600">
+                          İlk teklifinizi oluşturmak için "Yeni Teklif" sekmesine gidin
+                        </p>
+                        <Button 
+                          variant="outline"
+                          onClick={() => setQuoteSubTab('create')}
+                          className="bg-blue-50 border-blue-300 text-blue-700 hover:bg-blue-100"
+                        >
+                          <FileText className="w-4 h-4 mr-2" />
+                          Yeni Teklif Oluştur
+                        </Button>
+                      </div>
+                    ) : filteredQuotes.length === 0 ? (
+                        <div className="text-center py-12 text-slate-500">
+                          <FileText className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                          <p className="text-lg mb-2">"{quoteSearchTerm}" araması için sonuç bulunamadı</p>
                           <Button 
                             variant="outline" 
                             size="sm" 
