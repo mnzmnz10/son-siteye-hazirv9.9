@@ -4958,10 +4958,13 @@ function App() {
                   <div className="p-6">
                     {selectedProducts.size > 0 ? (
                   <div className="space-y-6">
-                    {/* Selected Products Summary */}
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-semibold text-blue-900">
+                    {/* Selected Products Summary - Modern Blue Theme */}
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-5 shadow-sm">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-bold text-blue-900 flex items-center gap-2">
+                          <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                            <Package className="w-4 h-4 text-white" />
+                          </div>
                           Seçili Ürünler ({selectedProducts.size} çeşit, {calculateQuoteTotals.totalQuantity} adet)
                         </h4>
                         <div className="flex items-center gap-2">
@@ -4970,29 +4973,26 @@ function App() {
                               variant="outline"
                               size="sm"
                               onClick={clearSelection}
-                              className="p-1 text-red-600 hover:text-red-800 hover:bg-red-50 border-red-200"
+                              className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 border-red-200"
                               title="Teklifi Kapat"
                             >
-                              <X className="w-3 h-3 mr-1" />
-                              <span className="text-xs">Teklifi Kapat</span>
+                              <X className="w-4 h-4 mr-1" />
+                              <span className="text-xs font-medium">Teklifi Kapat</span>
                             </Button>
                           )}
-                          {/* Teklif İndirimli Fiyat Toggle Butonu */}
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => {
-                              console.log('Quote toggle before:', showQuoteDiscountedPrices);
                               setShowQuoteDiscountedPrices(!showQuoteDiscountedPrices);
-                              console.log('Quote toggle after:', !showQuoteDiscountedPrices);
                             }}
-                            className="p-1"
+                            className="p-1.5 border-blue-300 hover:bg-blue-100"
                             title={showQuoteDiscountedPrices ? "İndirimli fiyatları gizle" : "İndirimli fiyatları göster"}
                           >
                             {showQuoteDiscountedPrices ? (
-                              <EyeOff className="w-3 h-3" />
+                              <EyeOff className="w-4 h-4 text-blue-600" />
                             ) : (
-                              <Eye className="w-3 h-3" />
+                              <Eye className="w-4 h-4 text-blue-600" />
                             )}
                           </Button>
                         </div>
