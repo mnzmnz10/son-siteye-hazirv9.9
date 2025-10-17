@@ -5076,8 +5076,8 @@ function App() {
                           </Button>
                         </div>
                       </div>
-                      <div className="grid gap-2 max-h-60 overflow-y-auto">
-                        {getSelectedProductsData().slice(0, 5).map((product) => {
+                      <div className="grid gap-2 max-h-96 overflow-y-auto">
+                        {getSelectedProductsData().map((product) => {
                           const company = companies.find(c => c.id === product.company_id);
                           return (
                             <div key={product.id} className="flex items-center justify-between bg-white rounded-lg p-3 text-sm shadow-sm border border-blue-100 hover:border-blue-300 transition-all">
