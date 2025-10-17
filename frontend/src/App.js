@@ -1280,9 +1280,16 @@ function App() {
         quantity: p.quantity || 1
       }));
 
+      console.log('💾 Teklif Kaydediliyor/Güncelleniyor:');
+      console.log('📦 Seçili Ürün Sayısı:', selectedProducts.size);
+      console.log('📦 Gönderilecek Ürünler:', selectedProductData);
+      console.log('📝 Yüklü Teklif:', loadedQuote);
+
       // Eğer mevcut bir teklif yüklenmişse ve isim değişmemişse onu güncelle
       if (loadedQuote && loadedQuote.id && 
           (loadedQuote.name === quoteName || quoteName === '')) {
+        
+        console.log('🔄 Mevcut teklif güncelleniyor:', loadedQuote.id);
         
         const updateResponse = await fetch(`${API}/quotes/${loadedQuote.id}`, {
           method: 'PUT',
@@ -1302,6 +1309,12 @@ function App() {
         if (!updateResponse.ok) {
           throw new Error('Teklif güncellenemedi');
         }
+        
+        const updatedQuote = await updateResponse.json();
+        console.log('✅ Güncellenmiş Teklif:', updatedQuote);
+        
+        // Yüklü teklifi güncelle
+        setLoadedQuote(updatedQuote);
         
         await fetchQuotes();
         toast.success(`"${loadedQuote.name}" teklifi güncellendi!`);
