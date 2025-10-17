@@ -5140,11 +5140,6 @@ function App() {
                             </div>
                           );
                         })}
-                        {selectedProducts.size > 5 && (
-                          <div className="text-center text-sm text-slate-500 py-2 bg-blue-50 rounded-lg">
-                            ... ve {selectedProducts.size - 5} ürün daha
-                          </div>
-                        )}
                       </div>
                     </div>
 
