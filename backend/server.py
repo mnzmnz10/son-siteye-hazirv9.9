@@ -2276,6 +2276,62 @@ async def update_quote(quote_id: str, quote_update: Dict[str, Any]):
         if "discount_percentage" in quote_update:
             update_data["discount_percentage"] = float(quote_update["discount_percentage"])
         
+        # Ürün listesi güncellenirse - YENİ EKLENDİ
+        if "products" in quote_update:
+            products_data = quote_update["products"]
+            
+            # Ürün bilgilerini veritabanından al
+            product_ids = [p["id"] for p in products_data]
+            db_products = await db.products.find(
+                {"id": {"$in": product_ids}, "status": "active"}
+            ).to_list(length=None)
+            
+            # Her ürün için detayları ekle
+            processed_products = []
+            total_list_price = 0
+            total_discounted_price = 0
+            
+            for product_data in products_data:
+                product_id = product_data["id"]
+                quantity = product_data.get("quantity", 1)
+                
+                # Ürün bilgisini bul
+                product = next((p for p in db_products if p["id"] == product_id), None)
+                if product:
+                    # Özel fiyat kontrolü
+                    custom_price = product_data.get("custom_price")
+                    list_price = custom_price if custom_price else product.get("list_price_try", 0)
+                    discounted_price = product.get("discounted_price_try", list_price)
+                    
+                    total_list_price += list_price * quantity
+                    total_discounted_price += discounted_price * quantity
+                    
+                    processed_products.append({
+                        "id": product_id,
+                        "name": product.get("name", ""),
+                        "quantity": quantity,
+                        "list_price_try": list_price,
+                        "discounted_price_try": discounted_price,
+                        "custom_price": custom_price
+                    })
+            
+            # Güncellenen ürün listesini ve toplamları ekle
+            update_data["products"] = processed_products
+            update_data["total_list_price"] = total_list_price
+            update_data["total_discounted_price"] = total_discounted_price
+            
+            # Net toplamı yeniden hesapla (indirim ve işçilikle birlikte)
+            discount_percentage = quote_update.get("discount_percentage", existing_quote.get("discount_percentage", 0))
+            labor_cost = quote_update.get("labor_cost", existing_quote.get("labor_cost", 0))
+            
+            discount_amount = total_list_price * (discount_percentage / 100)
+            total_net_price = total_list_price - discount_amount + labor_cost
+            
+            update_data["discount_percentage"] = discount_percentage
+            update_data["labor_cost"] = labor_cost
+            update_data["discount_amount"] = discount_amount
+            update_data["total_net_price"] = total_net_price
+        
         # Teklif notları güncellenirse
         if "notes" in quote_update:
             update_data["notes"] = quote_update["notes"]
