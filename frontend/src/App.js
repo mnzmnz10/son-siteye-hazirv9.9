@@ -4563,6 +4563,7 @@ function App() {
                               </Button>
                               <Badge variant="outline">
                                 {categoryProducts.length} ürün
+                                {favoriteProducts.length > 0 && ` (${favoriteProducts.length} favori)`}
                               </Badge>
                             </div>
                           </div>
@@ -4577,15 +4578,15 @@ function App() {
                                       <input
                                         type="checkbox"
                                         className="rounded border-gray-300"
-                                        checked={categoryProducts.every(p => selectedProducts.has(p.id))}
+                                        checked={visibleProducts.every(p => selectedProducts.has(p.id))}
                                         onChange={(e) => {
                                           if (e.target.checked) {
                                             const newSelected = new Map(selectedProducts);
-                                            categoryProducts.forEach(p => newSelected.set(p.id, 1));
+                                            visibleProducts.forEach(p => newSelected.set(p.id, 1));
                                             setSelectedProducts(newSelected);
                                           } else {
                                             const newSelected = new Map(selectedProducts);
-                                            categoryProducts.forEach(p => newSelected.delete(p.id));
+                                            visibleProducts.forEach(p => newSelected.delete(p.id));
                                             setSelectedProducts(newSelected);
                                           }
                                         }}
@@ -4607,7 +4608,7 @@ function App() {
                                 </TableRow>
                               </TableHeader>
                               <TableBody>
-                                {categoryProducts.map((product) => {
+                                {visibleProducts.map((product) => {
                                   const company = companies.find(c => c.id === product.company_id);
                                   const isEditing = editingProduct === product.id;
                                   
