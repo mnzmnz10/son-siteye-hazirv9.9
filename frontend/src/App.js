@@ -5789,9 +5789,22 @@ function App() {
                                     try {
                                       const productIds = new Map();
                                       const productData = new Map();
+                                      
                                       quote.products.forEach(p => {
                                         productIds.set(p.id, p.quantity || 1);
-                                        productData.set(p.id, p);
+                                        
+                                        // Ürün detaylarını products array'inden bul
+                                        const fullProduct = products.find(prod => prod.id === p.id);
+                                        if (fullProduct) {
+                                          // Tam ürün bilgilerini kullan (görsel dahil)
+                                          productData.set(p.id, {
+                                            ...fullProduct,
+                                            quantity: p.quantity || 1
+                                          });
+                                        } else {
+                                          // Bulunamazsa backend'den gelen veriyi kullan
+                                          productData.set(p.id, p);
+                                        }
                                       });
                                       
                                       setSelectedProducts(new Map(productIds));
