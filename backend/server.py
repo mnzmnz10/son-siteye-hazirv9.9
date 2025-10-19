@@ -5682,13 +5682,17 @@ async def scrape_products(request: ScrapeRequest):
         
         # Stratejiler:
         # 1. Product card'ları bul (class içinde "product" kelimesi olanlar)
+        # 2. AMA "itemCategory" class'ını atla (bu kategori başlığı)
         product_containers = (
             soup.find_all(['div', 'article', 'li'], class_=re.compile(r'product', re.I)) or
             soup.find_all(['div', 'article', 'li'], class_=re.compile(r'item', re.I)) or
             soup.find_all(['div', 'article'], attrs={'data-product-id': True})
         )
         
-        print(f"📦 {len(product_containers)} potansiyel ürün container bulundu")
+        # itemCategory class'ını filtrele
+        product_containers = [p for p in product_containers if 'itemCategory' not in (p.get('class') or [])]
+        
+        print(f"📦 {len(product_containers)} potansiyel ürün container bulundu (itemCategory filtrelendi)")
         
         seen_names = set()  # Duplicate kontrolü için
         
