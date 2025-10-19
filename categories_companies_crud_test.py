@@ -15,7 +15,7 @@ import uuid
 from datetime import datetime
 
 class CategoriesCompaniesCRUDTester:
-    def __init__(self, base_url="https://shopstack-44.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://quotemate-3.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0
