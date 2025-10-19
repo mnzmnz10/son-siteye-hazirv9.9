@@ -1361,7 +1361,7 @@ function App() {
         if (!selectedScrapedProducts.has(i)) continue;
         
         const product = scrapedProducts[i];
-        const discountPercent = productDiscounts[i] || 0;
+        const discountPercent = product.discount || 0;
         const originalPrice = product.price || 0;
         
         // İskonto hesapla
