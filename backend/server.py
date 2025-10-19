@@ -5693,11 +5693,13 @@ async def scrape_products(request: ScrapeRequest):
         
         for container in product_containers[:50]:  # İlk 50 ürün
             try:
-                # ÖNEMLI: itemCategory elementini atla - bu kategori başlığıdır, ürün değildir
-                if container.find('a', class_='itemCategory'):
-                    category_name = container.find('a', class_='itemCategory').get_text(strip=True) if container.find('a', class_='itemCategory') else "Unknown"
-                    print(f"⏭️ Kategori başlığı atlandı: {category_name}")
-                    continue
+                # ÖNEMLI: itemCategory element varsa, category bilgisini al ama devam et
+                # (agus.com.tr'de itemCategory ve ürün bilgisi aynı container'da)
+                has_category_header = container.find('a', class_='itemCategory')
+                if has_category_header:
+                    category_header_text = has_category_header.get_text(strip=True)
+                    # Eğer container SADECE category header içeriyorsa atla
+                    # Yoksa category bilgisini not et ve devam et
                 
                 # Ürün adı - productName class'ına sahip elementi bul
                 name_elem = (
