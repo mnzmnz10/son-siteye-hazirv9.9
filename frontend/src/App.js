@@ -7043,45 +7043,80 @@ function App() {
                   </div>
                   
                   <div className="border rounded-lg max-h-96 overflow-y-auto">
-                    {scrapedProducts.map((product, index) => (
-                      <div
-                        key={index}
-                        className={`flex items-center gap-3 p-3 border-b hover:bg-gray-50 ${
-                          selectedScrapedProducts.has(index) ? 'bg-blue-50' : ''
-                        }`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedScrapedProducts.has(index)}
-                          onChange={(e) => {
-                            const newSet = new Set(selectedScrapedProducts);
-                            if (e.target.checked) {
-                              newSet.add(index);
-                            } else {
-                              newSet.delete(index);
-                            }
-                            setSelectedScrapedProducts(newSet);
-                          }}
-                          className="rounded"
-                        />
-                        {product.image_url && (
-                          <img
-                            src={product.image_url}
-                            alt={product.name}
-                            className="w-16 h-16 object-cover rounded border"
-                            onError={(e) => {e.target.style.display = 'none'}}
+                    {scrapedProducts.map((product, index) => {
+                      const discount = productDiscounts[index] || 0;
+                      const originalPrice = product.price || 0;
+                      const discountedPrice = originalPrice * (1 - discount / 100);
+                      
+                      return (
+                        <div
+                          key={index}
+                          className={`flex items-center gap-3 p-3 border-b hover:bg-gray-50 ${
+                            selectedScrapedProducts.has(index) ? 'bg-blue-50' : ''
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedScrapedProducts.has(index)}
+                            onChange={(e) => {
+                              const newSet = new Set(selectedScrapedProducts);
+                              if (e.target.checked) {
+                                newSet.add(index);
+                              } else {
+                                newSet.delete(index);
+                              }
+                              setSelectedScrapedProducts(newSet);
+                            }}
+                            className="rounded"
                           />
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium text-gray-900 truncate">{product.name}</div>
-                          <div className="text-sm text-gray-500">
-                            {product.price ? `₺${product.price.toFixed(2)}` : 'Fiyat yok'}
-                            {product.brand && ` • ${product.brand}`}
-                            {product.category && ` • ${product.category}`}
+                          {product.image_url && (
+                            <img
+                              src={product.image_url}
+                              alt={product.name}
+                              className="w-16 h-16 object-cover rounded border"
+                              onError={(e) => {e.target.style.display = 'none'}}
+                            />
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-gray-900 truncate">{product.name}</div>
+                            <div className="text-sm text-gray-500">
+                              <span className={discount > 0 ? 'line-through text-gray-400' : ''}>
+                                ₺{originalPrice.toFixed(2)}
+                              </span>
+                              {discount > 0 && (
+                                <span className="ml-2 text-green-600 font-medium">
+                                  ₺{discountedPrice.toFixed(2)}
+                                </span>
+                              )}
+                              {product.brand && ` • ${product.brand}`}
+                              {product.category && ` • ${product.category}`}
+                            </div>
+                          </div>
+                          
+                          {/* İskonto Oranı Input */}
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="number"
+                              min="0"
+                              max="100"
+                              step="1"
+                              value={discount || ''}
+                              onChange={(e) => {
+                                const value = parseFloat(e.target.value) || 0;
+                                const clampedValue = Math.max(0, Math.min(100, value));
+                                setProductDiscounts(prev => ({
+                                  ...prev,
+                                  [index]: clampedValue
+                                }));
+                              }}
+                              placeholder="0"
+                              className="w-16 px-2 py-1 text-sm border rounded text-center"
+                            />
+                            <span className="text-sm text-gray-500">%</span>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               </>
