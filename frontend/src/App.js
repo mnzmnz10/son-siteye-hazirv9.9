@@ -1325,6 +1325,7 @@ function App() {
       const data = await response.json();
       setScrapedProducts(data.products || []);
       setSelectedScrapedProducts(new Set(data.products.map((_, i) => i))); // Hepsini seç
+      setProductDiscounts({}); // İskonto oranlarını sıfırla
       toast.success(`${data.count} ürün bulundu!`);
     } catch (error) {
       console.error('Scraping hatası:', error);
