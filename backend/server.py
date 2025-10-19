@@ -5690,6 +5690,8 @@ async def scrape_products(request: ScrapeRequest):
         
         print(f"📦 {len(product_containers)} potansiyel ürün container bulundu")
         
+        seen_names = set()  # Duplicate kontrolü için
+        
         for container in product_containers[:50]:  # İlk 50 ürün
             try:
                 # Ürün adı
@@ -5699,6 +5701,11 @@ async def scrape_products(request: ScrapeRequest):
                     container.find(['h1', 'h2', 'h3', 'h4'])
                 )
                 name = name_elem.get_text(strip=True) if name_elem else None
+                
+                # Duplicate kontrolü
+                if name and name in seen_names:
+                    print(f"⏭️ Atlanan (duplicate): {name[:50]}...")
+                    continue
                 
                 # Fiyat
                 price_elem = (
