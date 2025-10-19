@@ -1391,7 +1391,6 @@ function App() {
       setSelectedScrapedProducts(new Set());
       setScrapeCompanyId('');
       setProductDiscounts({});
-      await fetchProducts();
     } catch (error) {
       console.error('Kaydetme hatası:', error);
       toast.error('Ürünler kaydedilemedi');
