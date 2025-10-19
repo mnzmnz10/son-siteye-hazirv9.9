@@ -5267,8 +5267,8 @@ function App() {
                                   <div className="text-slate-500 text-xs">{company?.name}</div>
                                 </div>
                               </div>
-                              <div className="flex items-center gap-4">
-                                <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-4 relative z-10">
+                                <div className="flex items-center gap-2 relative z-20">
                                   <span className="text-xs text-slate-600 font-medium">Adet:</span>
                                   <input
                                     type="number"
@@ -5278,7 +5278,7 @@ function App() {
                                       const quantity = parseInt(e.target.value) || 1;
                                       toggleProductSelection(product.id, quantity);
                                     }}
-                                    className="w-16 px-2 py-1.5 text-sm border border-blue-200 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    className="w-16 px-2 py-1.5 text-sm border border-blue-200 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent relative z-30 bg-white"
                                   />
                                 </div>
                                 <div className="text-right min-w-[120px]">
