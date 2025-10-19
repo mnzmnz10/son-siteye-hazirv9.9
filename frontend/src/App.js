@@ -4675,11 +4675,11 @@ function App() {
                                       className={selectedProducts.has(product.id) ? 'bg-blue-50 border-blue-200' : ''}
                                     >
                                       <TableCell>
-                                        <div className="flex items-center gap-2 relative z-10">
+                                        <div className="flex items-center gap-3 relative z-10">
                                           {/* Teklif için checkbox */}
                                           <input
                                             type="checkbox"
-                                            className="rounded border-gray-300 relative z-20"
+                                            className="rounded border-gray-300 relative z-20 flex-shrink-0"
                                             checked={selectedProducts.has(product.id)}
                                             onChange={(e) => {
                                               if (e.target.checked) {
@@ -4699,7 +4699,7 @@ function App() {
                                                 const quantity = parseInt(e.target.value) || 1;
                                                 toggleProductSelection(product.id, quantity);
                                               }}
-                                              className="w-16 px-2 py-1 text-sm border rounded relative z-30 bg-white"
+                                              className="w-14 px-1.5 py-1 text-xs border rounded relative z-30 bg-white flex-shrink-0"
                                               placeholder="1"
                                             />
                                           )}
