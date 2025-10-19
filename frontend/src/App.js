@@ -7134,13 +7134,17 @@ function App() {
                                 const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
                                 const clampedValue = Math.max(0, Math.min(100, value));
                                 
-                                // Ürünü güncelle
+                                console.log('Setting discount for index', index, 'to', clampedValue);
+                                
+                                // Ürünü güncelle - doğru immutable update
                                 setScrapedProducts(prev => {
-                                  const updated = [...prev];
-                                  updated[index] = {
-                                    ...updated[index],
-                                    discount: clampedValue
-                                  };
+                                  const updated = prev.map((item, idx) => {
+                                    if (idx === index) {
+                                      return { ...item, discount: clampedValue };
+                                    }
+                                    return item;
+                                  });
+                                  console.log('Updated product:', updated[index]);
                                   return updated;
                                 });
                                 
@@ -7149,8 +7153,6 @@ function App() {
                                   ...prev,
                                   [index]: clampedValue
                                 }));
-                                
-                                console.log('Discount updated:', index, clampedValue);
                               }}
                               placeholder="0"
                               className="w-16 px-2 py-1 text-sm border rounded text-center"
