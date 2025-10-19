@@ -5765,11 +5765,14 @@ async def scrape_products(request: ScrapeRequest):
                             image_url = candidate_url
                             break
                 
-                # Kategori - itemCategoryLine veya category class'ından al (ama itemCategory a tag'i değil!)
+                # Kategori - itemCategoryLine'dan al
                 category = None
-                category_line = container.find('div', class_='itemCategoryLine')
-                if category_line:
-                    category = category_line.get_text(strip=True)
+                if has_category_header:
+                    category = category_header_text
+                else:
+                    category_line = container.find('div', class_='itemCategoryLine')
+                    if category_line:
+                        category = category_line.get_text(strip=True)
                 
                 # Marka
                 brand_elem = container.find(class_=re.compile(r'(productMarka|brand|marka)', re.I))
