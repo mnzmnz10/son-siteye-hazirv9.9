@@ -4699,7 +4699,7 @@ function App() {
                                                 const quantity = parseInt(e.target.value) || 1;
                                                 toggleProductSelection(product.id, quantity);
                                               }}
-                                              className="w-12 px-1 py-0.5 text-xs border rounded relative z-30 bg-white flex-shrink-0"
+                                              className="w-10 px-1 py-0.5 text-xs border rounded relative z-30 bg-white flex-shrink-0"
                                               placeholder="1"
                                             />
                                           )}
