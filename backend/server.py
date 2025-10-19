@@ -5734,50 +5734,27 @@ async def scrape_products(request: ScrapeRequest):
                         except:
                             pass
                 
-                # Görsel - productImage veya productList-Image-Owl içindeki img'yi bul
+                # Görsel - productImage veya productImageOwlSlider içindeki img'yi bul
                 image_url = None
-                # Önce productImage veya productList-Image-Owl div'ini bul
-                image_container = (
-                    container.find('div', class_=re.compile(r'productImage', re.I)) or
-                    container.find('div', class_=re.compile(r'productList-Image', re.I))
-                )
                 
-                if image_container:
-                    # Bu container içindeki ilk img elementini bul
-                    img_elem = image_container.find('img')
-                    if img_elem:
-                        # data-src öncelikli (lazy loading), sonra src
-                        data_src = img_elem.get('data-src')
-                        src = img_elem.get('src')
-                        data_lazy_src = img_elem.get('data-lazy-src')
-                        
-                        # Debug logging for image extraction
-                        if name and 'Suga Karavan Tente' in name:
-                            print(f"🔍 DEBUG - Image extraction for {name[:30]}...")
-                            print(f"   data-src: {data_src}")
-                            print(f"   src: {src}")
-                            print(f"   data-lazy-src: {data_lazy_src}")
-                        
-                        image_url = data_src or src or data_lazy_src
-                        
-                        # load.gif, placeholder veya loading içeriyorsa geçersiz say
-                        if image_url and ('load.gif' in image_url or 'placeholder' in image_url.lower() or 'loading' in image_url.lower()):
-                            if name and 'Suga Karavan Tente' in name:
-                                print(f"   FILTERED OUT: {image_url}")
-                            image_url = None
-                        else:
-                            if name and 'Suga Karavan Tente' in name:
-                                print(f"   PASSED FILTER: {image_url}")
-                        
+                # Tüm img elementlerini bul ve uygun olanı seç
+                all_imgs = container.find_all('img')
+                
+                for img_elem in all_imgs:
+                    # data-src öncelikli (lazy loading için), sonra src
+                    candidate_url = img_elem.get('data-src') or img_elem.get('src') or img_elem.get('data-lazy-src')
+                    
+                    # load.gif, placeholder, lazy load indicator'larını atla
+                    if candidate_url and not any(skip in candidate_url.lower() for skip in ['load.gif', 'placeholder', 'loading.gif']):
                         # Relative URL'i absolute yap
-                        if image_url and not image_url.startswith('http'):
+                        if not candidate_url.startswith('http'):
                             from urllib.parse import urljoin
-                            image_url = urljoin(request.url, image_url)
-                            if name and 'Suga Karavan Tente' in name:
-                                print(f"   ABSOLUTE URL: {image_url}")
-                else:
-                    if name and 'Suga Karavan Tente' in name:
-                        print(f"🔍 DEBUG - No image container found for {name[:30]}...")
+                            candidate_url = urljoin(request.url, candidate_url)
+                        
+                        # İlk geçerli görseli kullan
+                        if candidate_url.startswith('http'):
+                            image_url = candidate_url
+                            break
                 
                 # Kategori - itemCategoryLine veya category class'ından al (ama itemCategory a tag'i değil!)
                 category = None
