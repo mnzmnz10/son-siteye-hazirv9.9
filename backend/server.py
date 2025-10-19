@@ -5734,21 +5734,29 @@ async def scrape_products(request: ScrapeRequest):
                         except:
                             pass
                 
-                # Görsel - data-src veya src attributelarına bak, load.gif'i görmezden gel
-                img_elem = container.find('img')
+                # Görsel - productImage veya productList-Image-Owl içindeki img'yi bul
                 image_url = None
-                if img_elem:
-                    # Önce data-src'ye bak (lazy loading için)
-                    image_url = img_elem.get('data-src') or img_elem.get('src') or img_elem.get('data-lazy-src')
-                    
-                    # load.gif, placeholder veya loading içeriyorsa geçersiz say
-                    if image_url and ('load.gif' in image_url or 'placeholder' in image_url.lower() or 'loading' in image_url.lower()):
-                        image_url = None
-                    
-                    # Relative URL'i absolute yap
-                    if image_url and not image_url.startswith('http'):
-                        from urllib.parse import urljoin
-                        image_url = urljoin(request.url, image_url)
+                # Önce productImage veya productList-Image-Owl div'ini bul
+                image_container = (
+                    container.find('div', class_=re.compile(r'productImage', re.I)) or
+                    container.find('div', class_=re.compile(r'productList-Image', re.I))
+                )
+                
+                if image_container:
+                    # Bu container içindeki ilk img elementini bul
+                    img_elem = image_container.find('img')
+                    if img_elem:
+                        # data-src öncelikli (lazy loading), sonra src
+                        image_url = img_elem.get('data-src') or img_elem.get('src') or img_elem.get('data-lazy-src')
+                        
+                        # load.gif, placeholder veya loading içeriyorsa geçersiz say
+                        if image_url and ('load.gif' in image_url or 'placeholder' in image_url.lower() or 'loading' in image_url.lower()):
+                            image_url = None
+                        
+                        # Relative URL'i absolute yap
+                        if image_url and not image_url.startswith('http'):
+                            from urllib.parse import urljoin
+                            image_url = urljoin(request.url, image_url)
                 
                 # Kategori - itemCategoryLine veya category class'ından al (ama itemCategory a tag'i değil!)
                 category = None
