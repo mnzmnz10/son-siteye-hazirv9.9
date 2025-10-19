@@ -7123,31 +7123,18 @@ function App() {
                           {/* İskonto Oranı Input */}
                           <div className="flex items-center gap-2">
                             <input
-                              type="text"
-                              inputMode="numeric"
-                              pattern="[0-9]*"
-                              value={product.discount || ''}
-                              onChange={(e) => {
-                                // Sadece sayıları kabul et
-                                const value = e.target.value.replace(/[^0-9]/g, '');
-                                
-                                // Temporary update - kullanıcı yazmaya devam edebilsin
-                                setScrapedProducts(prev => {
-                                  const updated = prev.map((item, idx) => {
-                                    if (idx === index) {
-                                      return { ...item, discount: value };
-                                    }
-                                    return item;
-                                  });
-                                  return updated;
-                                });
-                              }}
+                              key={`discount-input-${index}`}
+                              type="number"
+                              min="0"
+                              max="100"
+                              step="1"
+                              defaultValue={discount || 0}
                               onBlur={(e) => {
                                 // Input'tan çıkınca final değeri işle
-                                const value = e.target.value === '' ? 0 : parseInt(e.target.value, 10);
+                                const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
                                 const clampedValue = Math.max(0, Math.min(100, value));
                                 
-                                console.log('Final discount for index', index, ':', clampedValue);
+                                console.log('Setting discount for product', index, 'to', clampedValue);
                                 
                                 // Final değeri kaydet
                                 setScrapedProducts(prev => {
@@ -7160,11 +7147,14 @@ function App() {
                                   return updated;
                                 });
                                 
-                                // Backup
-                                setProductDiscounts(prev => ({
-                                  ...prev,
-                                  [index]: clampedValue
-                                }));
+                                // Input'u güncelle
+                                e.target.value = clampedValue;
+                              }}
+                              onKeyDown={(e) => {
+                                // Enter tuşuna basınca da blur tetikle
+                                if (e.key === 'Enter') {
+                                  e.target.blur();
+                                }
                               }}
                               placeholder="0"
                               className="w-16 px-2 py-1 text-sm border rounded text-center"
