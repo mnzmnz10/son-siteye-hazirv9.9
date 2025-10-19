@@ -7132,16 +7132,24 @@ function App() {
                               onChange={(e) => {
                                 const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
                                 const clampedValue = Math.max(0, Math.min(100, value));
-                                setProductDiscounts(prev => {
-                                  const newDiscounts = {
-                                    ...prev,
-                                    [index]: clampedValue
+                                
+                                // Ürünü güncelle
+                                setScrapedProducts(prev => {
+                                  const updated = [...prev];
+                                  updated[index] = {
+                                    ...updated[index],
+                                    discount: clampedValue
                                   };
-                                  console.log('Discount updated:', index, clampedValue, newDiscounts);
-                                  return newDiscounts;
+                                  return updated;
                                 });
-                                // Force re-render
-                                forceUpdate({});
+                                
+                                // Backup olarak productDiscounts'ta da tut
+                                setProductDiscounts(prev => ({
+                                  ...prev,
+                                  [index]: clampedValue
+                                }));
+                                
+                                console.log('Discount updated:', index, clampedValue);
                               }}
                               placeholder="0"
                               className="w-16 px-2 py-1 text-sm border rounded text-center"
