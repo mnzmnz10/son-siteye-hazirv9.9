@@ -7047,6 +7047,16 @@ function App() {
                       const originalPrice = product.price || 0;
                       const discountedPrice = originalPrice * (1 - discount / 100);
                       
+                      // Debug: Log render values
+                      if (discount > 0) {
+                        console.log(`Rendering product ${index}:`, {
+                          discount,
+                          originalPrice,
+                          discountedPrice,
+                          productDiscounts
+                        });
+                      }
+                      
                       return (
                         <div
                           key={`product-${index}-${discount}`}
