@@ -5251,12 +5251,12 @@ function App() {
                           const company = companies.find(c => c.id === product.company_id);
                           return (
                             <div key={product.id} className="flex items-center justify-between bg-white rounded-lg p-3 text-sm shadow-sm border border-blue-100 hover:border-blue-300 transition-all">
-                              <div className="flex items-center gap-3 flex-1">
+                              <div className="flex items-center gap-3 flex-1 relative z-0">
                                 {product.image_url && (
                                   <img 
                                     src={product.image_url} 
                                     alt={product.name}
-                                    className="w-12 h-12 object-cover rounded-lg cursor-pointer hover:opacity-75 transition-opacity border border-gray-200"
+                                    className="w-12 h-12 object-cover rounded-lg cursor-pointer hover:opacity-75 transition-opacity border border-gray-200 relative z-0"
                                     onError={(e) => {e.target.style.display = 'none'}}
                                     onClick={() => openImagePreview(product.image_url, product.name)}
                                     title="Görseli büyük boyutta görüntülemek için tıklayın"
