@@ -7130,18 +7130,33 @@ function App() {
                           {/* İskonto Oranı Input */}
                           <div className="flex items-center gap-2">
                             <input
-                              type="number"
-                              min="0"
-                              max="100"
-                              step="1"
-                              value={product.discount || 0}
+                              type="text"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
+                              value={product.discount || ''}
                               onChange={(e) => {
-                                const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                                // Sadece sayıları kabul et
+                                const value = e.target.value.replace(/[^0-9]/g, '');
+                                
+                                // Temporary update - kullanıcı yazmaya devam edebilsin
+                                setScrapedProducts(prev => {
+                                  const updated = prev.map((item, idx) => {
+                                    if (idx === index) {
+                                      return { ...item, discount: value };
+                                    }
+                                    return item;
+                                  });
+                                  return updated;
+                                });
+                              }}
+                              onBlur={(e) => {
+                                // Input'tan çıkınca final değeri işle
+                                const value = e.target.value === '' ? 0 : parseInt(e.target.value, 10);
                                 const clampedValue = Math.max(0, Math.min(100, value));
                                 
-                                console.log('Setting discount for index', index, 'to', clampedValue);
+                                console.log('Final discount for index', index, ':', clampedValue);
                                 
-                                // Ürünü güncelle - doğru immutable update
+                                // Final değeri kaydet
                                 setScrapedProducts(prev => {
                                   const updated = prev.map((item, idx) => {
                                     if (idx === index) {
@@ -7149,11 +7164,10 @@ function App() {
                                     }
                                     return item;
                                   });
-                                  console.log('Updated product:', updated[index]);
                                   return updated;
                                 });
                                 
-                                // Backup olarak productDiscounts'ta da tut
+                                // Backup
                                 setProductDiscounts(prev => ({
                                   ...prev,
                                   [index]: clampedValue
