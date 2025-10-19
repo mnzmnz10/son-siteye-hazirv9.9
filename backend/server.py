@@ -5740,6 +5740,13 @@ async def scrape_products(request: ScrapeRequest):
                 # Tüm img elementlerini bul ve uygun olanı seç
                 all_imgs = container.find_all('img')
                 
+                # Debug: İlk üründe img sayısını göster
+                if not seen_names:  # İlk ürün
+                    print(f"🔍 DEBUG - Container has {len(all_imgs)} img elements")
+                    for idx, img in enumerate(all_imgs[:3]):
+                        print(f"   IMG {idx}: data-src={img.get('data-src', 'None')[:50] if img.get('data-src') else 'None'}")
+                        print(f"   IMG {idx}: src={img.get('src', 'None')[:50] if img.get('src') else 'None'}")
+                
                 for img_elem in all_imgs:
                     # data-src öncelikli (lazy loading için), sonra src
                     candidate_url = img_elem.get('data-src') or img_elem.get('src') or img_elem.get('data-lazy-src')
