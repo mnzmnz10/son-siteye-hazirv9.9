@@ -5680,14 +5680,37 @@ async def scrape_products(request: ScrapeRequest):
         # Ürünleri bul - Yaygın HTML yapıları
         products = []
         
-        # Product card'ları bul
-        product_containers = (
-            soup.find_all(['div', 'article', 'li'], class_=re.compile(r'product', re.I)) or
-            soup.find_all(['div', 'article', 'li'], class_=re.compile(r'item', re.I)) or
-            soup.find_all(['div', 'article'], attrs={'data-product-id': True})
-        )
+        # Product card'ları bul - birçok farklı site yapısını destekle
+        product_containers = []
         
-        print(f"📦 {len(product_containers)} potansiyel ürün container bulundu")
+        # Strateji 1: showcase class (solarkutu.com gibi)
+        showcase_items = soup.find_all('div', class_=re.compile(r'showcase', re.I))
+        if showcase_items:
+            product_containers.extend(showcase_items)
+            print(f"✅ {len(showcase_items)} showcase item bulundu")
+        
+        # Strateji 2: product class
+        if not product_containers:
+            product_items = soup.find_all(['div', 'article', 'li'], class_=re.compile(r'product', re.I))
+            if product_items:
+                product_containers.extend(product_items)
+                print(f"✅ {len(product_items)} product item bulundu")
+        
+        # Strateji 3: item class
+        if not product_containers:
+            item_containers = soup.find_all(['div', 'article', 'li'], class_=re.compile(r'item', re.I))
+            if item_containers:
+                product_containers.extend(item_containers)
+                print(f"✅ {len(item_containers)} item container bulundu")
+        
+        # Strateji 4: data attributes
+        if not product_containers:
+            data_products = soup.find_all(['div', 'article'], attrs={'data-product-id': True})
+            if data_products:
+                product_containers.extend(data_products)
+                print(f"✅ {len(data_products)} data-product item bulundu")
+        
+        print(f"📦 Toplam {len(product_containers)} potansiyel ürün container bulundu")
         
         seen_names = set()  # Duplicate kontrolü için
         
