@@ -7049,19 +7049,18 @@ function App() {
                   
                   <div className="border rounded-lg max-h-96 overflow-y-auto">
                     {scrapedProducts.map((product, index) => {
-                      const discount = productDiscounts[index] || 0;
+                      const discount = product.discount || 0;
                       const originalPrice = product.price || 0;
                       const discountedPrice = originalPrice * (1 - discount / 100);
                       
                       // Debug: Log render values
-                      if (discount > 0) {
-                        console.log(`Rendering product ${index}:`, {
-                          discount,
-                          originalPrice,
-                          discountedPrice,
-                          productDiscounts
-                        });
-                      }
+                      console.log(`Rendering product ${index}:`, {
+                        name: product.name?.substring(0, 30),
+                        discount,
+                        originalPrice,
+                        discountedPrice,
+                        willShowDiscount: discount > 0
+                      });
                       
                       return (
                         <div
