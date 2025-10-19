@@ -7127,7 +7127,7 @@ function App() {
                               min="0"
                               max="100"
                               step="1"
-                              value={discount}
+                              value={product.discount || 0}
                               onChange={(e) => {
                                 const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
                                 const clampedValue = Math.max(0, Math.min(100, value));
