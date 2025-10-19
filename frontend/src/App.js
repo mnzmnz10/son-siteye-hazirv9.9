@@ -7011,34 +7011,6 @@ function App() {
               </Button>
             </div>
             
-            {/* Cookie Girişi */}
-            <div className="space-y-2">
-              <Label htmlFor="cookies" className="text-sm font-medium flex items-center gap-2">
-                🍪 Cookie (B2B giriş için opsiyonel)
-                <button
-                  type="button"
-                  onClick={() => {
-                    const message = `Cookie Nasıl Alınır?\n\n1. Chrome'da B2B sitesine giriş yapın\n2. F12 tuşuna basın (Developer Tools)\n3. "Network" sekmesine gidin\n4. Sayfayı yenileyin (Ctrl+R)\n5. İlk isteğe tıklayın\n6. "Headers" bölümünde "Cookie:" satırını bulun\n7. Cookie değerini kopyalayıp buraya yapıştırın`;
-                    alert(message);
-                  }}
-                  className="text-xs text-blue-600 hover:underline"
-                >
-                  (Nasıl alınır?)
-                </button>
-              </Label>
-              <Input
-                id="cookies"
-                placeholder="session_id=abc123; auth_token=xyz789..."
-                value={scrapeCookies}
-                onChange={(e) => setScrapeCookies(e.target.value)}
-                disabled={isScraping}
-                className="font-mono text-xs"
-              />
-              <p className="text-xs text-gray-500">
-                💡 B2B sitelerden ürün çekmek için giriş yapmış tarayıcınızdan cookie'yi kopyalayın
-              </p>
-            </div>
-            
             {/* Firma Seçimi */}
             {scrapedProducts.length > 0 && (
               <>
