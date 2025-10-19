@@ -7079,17 +7079,30 @@ function App() {
                           )}
                           <div className="flex-1 min-w-0">
                             <div className="font-medium text-gray-900 truncate">{product.name}</div>
-                            <div className="text-sm text-gray-500">
-                              <span className={discount > 0 ? 'line-through text-gray-400' : ''}>
-                                ₺{originalPrice.toFixed(2)}
-                              </span>
-                              {discount > 0 && (
-                                <span className="ml-2 text-green-600 font-medium">
-                                  ₺{discountedPrice.toFixed(2)}
-                                </span>
-                              )}
-                              {product.brand && ` • ${product.brand}`}
-                              {product.category && ` • ${product.category}`}
+                            <div className="text-sm space-y-1">
+                              <div className="flex items-center gap-2">
+                                {discount > 0 ? (
+                                  <>
+                                    <span className="line-through text-gray-400">
+                                      ₺{originalPrice.toFixed(2)}
+                                    </span>
+                                    <span className="text-green-600 font-bold text-base">
+                                      ₺{discountedPrice.toFixed(2)}
+                                    </span>
+                                    <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-medium">
+                                      %{discount} İndirim
+                                    </span>
+                                  </>
+                                ) : (
+                                  <span className="text-gray-900 font-medium">
+                                    ₺{originalPrice.toFixed(2)}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-gray-500">
+                                {product.brand && `${product.brand}`}
+                                {product.category && ` • ${product.category}`}
+                              </div>
                             </div>
                           </div>
                           
