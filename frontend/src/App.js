@@ -7100,19 +7100,28 @@ function App() {
                               min="0"
                               max="100"
                               step="1"
-                              value={discount || ''}
+                              value={discount}
                               onChange={(e) => {
-                                const value = parseFloat(e.target.value) || 0;
+                                const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
                                 const clampedValue = Math.max(0, Math.min(100, value));
-                                setProductDiscounts(prev => ({
-                                  ...prev,
-                                  [index]: clampedValue
-                                }));
+                                setProductDiscounts(prev => {
+                                  const newDiscounts = {
+                                    ...prev,
+                                    [index]: clampedValue
+                                  };
+                                  console.log('Discount updated:', index, clampedValue, newDiscounts);
+                                  return newDiscounts;
+                                });
                               }}
                               placeholder="0"
                               className="w-16 px-2 py-1 text-sm border rounded text-center"
                             />
                             <span className="text-sm text-gray-500">%</span>
+                            {discount > 0 && (
+                              <span className="text-xs text-green-600 font-medium">
+                                -{discount}%
+                              </span>
+                            )}
                           </div>
                         </div>
                       );
