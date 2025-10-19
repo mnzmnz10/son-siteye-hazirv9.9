@@ -5739,7 +5739,7 @@ async def scrape_products(request: ScrapeRequest):
                 description = desc_elem.get_text(strip=True) if desc_elem else None
                 
                 # Ürün oluştur
-                if name and (price or image_url):  # En az isim ve (fiyat veya görsel) olmalı
+                if name and price:  # İsim VE fiyat zorunlu (kategori başlıklarını filtrele)
                     product = ScrapedProduct(
                         name=name[:200],  # Max 200 karakter
                         price=price,
@@ -5751,6 +5751,8 @@ async def scrape_products(request: ScrapeRequest):
                     )
                     products.append(product.dict())
                     print(f"✅ Ürün eklendi: {name[:50]}... - ₺{price}")
+                elif name and not price:
+                    print(f"⏭️ Atlanan (fiyat yok, muhtemelen kategori): {name[:50]}...")
                     
             except Exception as e:
                 print(f"⚠️ Ürün parse hatası: {str(e)}")
