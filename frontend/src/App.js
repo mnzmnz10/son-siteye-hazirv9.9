@@ -1302,6 +1302,89 @@ function App() {
     return filteredProducts.slice(0, 10); // Maksimum 10 sonuç
   };
 
+  // Web scraping fonksiyonu
+  const scrapeWebsite = async () => {
+    if (!scrapeUrl.trim()) {
+      toast.error('Lütfen bir URL girin');
+      return;
+    }
+    
+    setIsScraping(true);
+    try {
+      const response = await fetch(`${API}/scrape-products`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: scrapeUrl })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Scraping başarısız');
+      }
+      
+      const data = await response.json();
+      setScrapedProducts(data.products || []);
+      setSelectedScrapedProducts(new Set(data.products.map((_, i) => i))); // Hepsini seç
+      toast.success(`${data.count} ürün bulundu!`);
+    } catch (error) {
+      console.error('Scraping hatası:', error);
+      toast.error('Ürünler yüklenemedi: ' + error.message);
+    } finally {
+      setIsScraping(false);
+    }
+  };
+
+  // Scraped ürünleri kaydet
+  const saveScratedProducts = async () => {
+    if (!scrapeCompanyId) {
+      toast.error('Lütfen bir firma seçin');
+      return;
+    }
+    
+    if (selectedScrapedProducts.size === 0) {
+      toast.error('Lütfen en az bir ürün seçin');
+      return;
+    }
+    
+    const selectedItems = scrapedProducts.filter((_, i) => selectedScrapedProducts.has(i));
+    
+    try {
+      let successCount = 0;
+      for (const product of selectedItems) {
+        const productData = {
+          name: product.name,
+          description: product.description || '',
+          list_price: product.price || 0,
+          list_price_try: product.price || 0,
+          currency: 'TRY',
+          image_url: product.image_url || '',
+          brand: product.brand || '',
+          company_id: scrapeCompanyId
+        };
+        
+        const response = await fetch(`${API}/products`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(productData)
+        });
+        
+        if (response.ok) {
+          successCount++;
+        }
+      }
+      
+      toast.success(`${successCount} ürün başarıyla eklendi!`);
+      setShowScrapeDialog(false);
+      setScrapeUrl('');
+      setScrapedProducts([]);
+      setSelectedScrapedProducts(new Set());
+      setScrapeCompanyId('');
+      await fetchProducts();
+    } catch (error) {
+      console.error('Kaydetme hatası:', error);
+      toast.error('Ürünler kaydedilemedi');
+    }
+  };
+
   const clearSelection = () => {
     setSelectedProducts(new Map());
     setSelectedProductsData(new Map());
