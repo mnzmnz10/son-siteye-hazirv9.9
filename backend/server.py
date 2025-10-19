@@ -5680,69 +5680,84 @@ async def scrape_products(request: ScrapeRequest):
         # Ürünleri bul - Yaygın HTML yapıları
         products = []
         
-        # Stratejiler:
-        # 1. Product card'ları bul (class içinde "product" kelimesi olanlar)
-        # 2. AMA "itemCategory" class'ını atla (bu kategori başlığı)
+        # Product card'ları bul
         product_containers = (
             soup.find_all(['div', 'article', 'li'], class_=re.compile(r'product', re.I)) or
             soup.find_all(['div', 'article', 'li'], class_=re.compile(r'item', re.I)) or
             soup.find_all(['div', 'article'], attrs={'data-product-id': True})
         )
         
-        # itemCategory class'ını filtrele
-        product_containers = [p for p in product_containers if 'itemCategory' not in (p.get('class') or [])]
-        
-        print(f"📦 {len(product_containers)} potansiyel ürün container bulundu (itemCategory filtrelendi)")
+        print(f"📦 {len(product_containers)} potansiyel ürün container bulundu")
         
         seen_names = set()  # Duplicate kontrolü için
         
         for container in product_containers[:50]:  # İlk 50 ürün
             try:
-                # Ürün adı
+                # ÖNEMLI: itemCategory elementini atla - bu kategori başlığıdır, ürün değildir
+                if container.find('a', class_='itemCategory'):
+                    category_name = container.find('a', class_='itemCategory').get_text(strip=True) if container.find('a', class_='itemCategory') else "Unknown"
+                    print(f"⏭️ Kategori başlığı atlandı: {category_name}")
+                    continue
+                
+                # Ürün adı - productName class'ına sahip elementi bul
                 name_elem = (
-                    container.find(['h1', 'h2', 'h3', 'h4', 'a'], class_=re.compile(r'(name|title|product)', re.I)) or
-                    container.find('a', title=True) or
-                    container.find(['h1', 'h2', 'h3', 'h4'])
+                    container.find(class_=re.compile(r'productName', re.I)) or
+                    container.find(['h1', 'h2', 'h3', 'h4', 'a'], class_=re.compile(r'(name|title)', re.I)) or
+                    container.find('a', title=True)
                 )
                 name = name_elem.get_text(strip=True) if name_elem else None
+                
+                # Eğer isim yok veya çok kısa ise atla
+                if not name or len(name) < 5:
+                    continue
                 
                 # Duplicate kontrolü
                 if name and name in seen_names:
                     print(f"⏭️ Atlanan (duplicate): {name[:50]}...")
                     continue
                 
-                # Fiyat
+                # Fiyat - discountPrice veya productPrice içinde ara
                 price_elem = (
+                    container.find(class_=re.compile(r'discountPriceSpan', re.I)) or
                     container.find(class_=re.compile(r'(price|fiyat|amount)', re.I)) or
                     container.find(['span', 'div', 'p'], attrs={'data-price': True})
                 )
                 price_text = price_elem.get_text(strip=True) if price_elem else None
                 price = None
                 if price_text:
-                    # Sayıları çıkar
-                    price_match = re.search(r'([\d.,]+)', price_text.replace('.', '').replace(',', '.'))
+                    # Sayıları çıkar (₺3.152,50 formatından 3152.50 çıkar)
+                    price_clean = price_text.replace('₺', '').replace(' ', '').replace('.', '').replace(',', '.')
+                    price_match = re.search(r'([\d.]+)', price_clean)
                     if price_match:
                         try:
                             price = float(price_match.group(1))
                         except:
                             pass
                 
-                # Görsel
+                # Görsel - data-src veya src attributelarına bak, load.gif'i görmezden gel
                 img_elem = container.find('img')
                 image_url = None
                 if img_elem:
-                    image_url = img_elem.get('src') or img_elem.get('data-src') or img_elem.get('data-lazy-src')
+                    # Önce data-src'ye bak (lazy loading için)
+                    image_url = img_elem.get('data-src') or img_elem.get('src') or img_elem.get('data-lazy-src')
+                    
+                    # load.gif, placeholder veya loading içeriyorsa geçersiz say
+                    if image_url and ('load.gif' in image_url or 'placeholder' in image_url.lower() or 'loading' in image_url.lower()):
+                        image_url = None
+                    
                     # Relative URL'i absolute yap
                     if image_url and not image_url.startswith('http'):
                         from urllib.parse import urljoin
                         image_url = urljoin(request.url, image_url)
                 
-                # Kategori
-                category_elem = container.find(class_=re.compile(r'(category|kategori)', re.I))
-                category = category_elem.get_text(strip=True) if category_elem else None
+                # Kategori - itemCategoryLine veya category class'ından al (ama itemCategory a tag'i değil!)
+                category = None
+                category_line = container.find('div', class_='itemCategoryLine')
+                if category_line:
+                    category = category_line.get_text(strip=True)
                 
                 # Marka
-                brand_elem = container.find(class_=re.compile(r'(brand|marka)', re.I))
+                brand_elem = container.find(class_=re.compile(r'(productMarka|brand|marka)', re.I))
                 brand = brand_elem.get_text(strip=True) if brand_elem else None
                 
                 # Açıklama
@@ -5762,7 +5777,7 @@ async def scrape_products(request: ScrapeRequest):
                         currency="TRY"
                     )
                     products.append(product.dict())
-                    print(f"✅ Ürün eklendi: {name[:50]}... - ₺{price}")
+                    print(f"✅ Ürün eklendi: {name[:50]}... - ₺{price} - Görsel: {('Var' if image_url else 'Yok')}")
                 elif name and not price:
                     print(f"⏭️ Atlanan (fiyat yok, muhtemelen kategori): {name[:50]}...")
                     
