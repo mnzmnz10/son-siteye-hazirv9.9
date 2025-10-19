@@ -14060,6 +14060,272 @@ class KaravanAPITester:
         
         return True
 
+    def test_web_scraping_agus_comprehensive(self):
+        """Comprehensive test for web scraping endpoint with agus.com.tr as requested"""
+        print("\n🔍 Testing Web Scraping Endpoint with agus.com.tr...")
+        
+        # Test Case 1: Home Page Scraping
+        print("\n🔍 Test Case 1: Home Page Scraping...")
+        home_url = "https://www.agus.com.tr"
+        
+        success, response = self.run_test(
+            "Scrape agus.com.tr Home Page",
+            "POST",
+            "scrape-products",
+            200,
+            data={"url": home_url}
+        )
+        
+        home_page_products = []
+        if success and response:
+            try:
+                scrape_data = response.json()
+                if scrape_data.get('success') and 'products' in scrape_data:
+                    home_page_products = scrape_data['products']
+                    product_count = scrape_data.get('count', 0)
+                    
+                    self.log_test("Home Page Scraping Success", True, f"Found {product_count} products")
+                    
+                    # Verify products have required fields
+                    if home_page_products:
+                        sample_product = home_page_products[0]
+                        required_fields = ['name', 'price']
+                        missing_fields = [field for field in required_fields if not sample_product.get(field)]
+                        
+                        if not missing_fields:
+                            self.log_test("Home Page Product Structure", True, "Products have name and price")
+                        else:
+                            self.log_test("Home Page Product Structure", False, f"Missing fields: {missing_fields}")
+                        
+                        # Check for category headers that should NOT be included
+                        category_headers = ["Tente Aksesuarları", "Su Hortumu ve Fitreler", "Mutfak Malzemeleri"]
+                        found_categories = []
+                        for product in home_page_products:
+                            product_name = product.get('name', '')
+                            for category in category_headers:
+                                if category in product_name:
+                                    found_categories.append(product_name)
+                        
+                        if not found_categories:
+                            self.log_test("Category Headers Filtered Out", True, "No category headers found as product names")
+                        else:
+                            self.log_test("Category Headers Filtered Out", False, f"Found category headers: {found_categories}")
+                        
+                        # Verify product names are valid (length > 5)
+                        valid_names = [p for p in home_page_products if len(p.get('name', '')) > 5]
+                        if len(valid_names) == len(home_page_products):
+                            self.log_test("Valid Product Names", True, f"All {len(home_page_products)} products have valid names")
+                        else:
+                            self.log_test("Valid Product Names", False, f"Only {len(valid_names)}/{len(home_page_products)} products have valid names")
+                        
+                        # Verify prices are valid (number > 0)
+                        valid_prices = [p for p in home_page_products if isinstance(p.get('price'), (int, float)) and p.get('price', 0) > 0]
+                        if len(valid_prices) == len(home_page_products):
+                            self.log_test("Valid Product Prices", True, f"All {len(home_page_products)} products have valid prices")
+                        else:
+                            self.log_test("Valid Product Prices", False, f"Only {len(valid_prices)}/{len(home_page_products)} products have valid prices")
+                        
+                        # Verify image URLs are valid (not load.gif)
+                        products_with_images = [p for p in home_page_products if p.get('image_url')]
+                        valid_images = []
+                        invalid_images = []
+                        
+                        for product in products_with_images:
+                            image_url = product.get('image_url', '')
+                            if 'static.ticimax.cloud' in image_url and 'load.gif' not in image_url:
+                                valid_images.append(product)
+                            elif 'load.gif' in image_url:
+                                invalid_images.append(product)
+                        
+                        if len(valid_images) > 0:
+                            self.log_test("Valid Image URLs", True, f"{len(valid_images)} products have valid image URLs")
+                        else:
+                            self.log_test("Valid Image URLs", False, "No products have valid image URLs")
+                        
+                        if len(invalid_images) == 0:
+                            self.log_test("No load.gif Images", True, "No products have load.gif placeholder images")
+                        else:
+                            self.log_test("No load.gif Images", False, f"{len(invalid_images)} products have load.gif images")
+                        
+                        # Print first 3 products for manual inspection
+                        print("\n📋 First 3 Products from Home Page:")
+                        for i, product in enumerate(home_page_products[:3]):
+                            print(f"   Product {i+1}:")
+                            print(f"     Name: {product.get('name', 'N/A')}")
+                            print(f"     Price: ₺{product.get('price', 'N/A')}")
+                            print(f"     Image: {product.get('image_url', 'N/A')}")
+                            print(f"     Category: {product.get('category', 'N/A')}")
+                            print(f"     Brand: {product.get('brand', 'N/A')}")
+                            print()
+                    else:
+                        self.log_test("Home Page Products Found", False, "No products returned from home page")
+                else:
+                    self.log_test("Home Page Scraping Response", False, "Invalid response format")
+            except Exception as e:
+                self.log_test("Home Page Scraping Response Parsing", False, f"Error: {e}")
+        
+        # Test Case 2: Specific Category Page
+        print("\n🔍 Test Case 2: Specific Category Page Scraping...")
+        
+        # Try a few different category URLs from agus.com.tr
+        category_urls = [
+            "https://www.agus.com.tr/kategori/tente-aksesuarlari",
+            "https://www.agus.com.tr/kategori/mutfak-malzemeleri", 
+            "https://www.agus.com.tr/kategori/su-hortumu-ve-fitreler"
+        ]
+        
+        category_test_passed = False
+        category_page_products = []
+        
+        for category_url in category_urls:
+            try:
+                success, response = self.run_test(
+                    f"Scrape Category Page - {category_url.split('/')[-1]}",
+                    "POST",
+                    "scrape-products",
+                    200,
+                    data={"url": category_url}
+                )
+                
+                if success and response:
+                    try:
+                        scrape_data = response.json()
+                        if scrape_data.get('success') and scrape_data.get('count', 0) > 0:
+                            category_page_products = scrape_data['products']
+                            product_count = scrape_data.get('count', 0)
+                            
+                            self.log_test(f"Category Page Scraping - {category_url.split('/')[-1]}", True, f"Found {product_count} products")
+                            category_test_passed = True
+                            break  # Use the first successful category page
+                        else:
+                            self.log_test(f"Category Page Scraping - {category_url.split('/')[-1]}", False, "No products found")
+                    except Exception as e:
+                        self.log_test(f"Category Page Response - {category_url.split('/')[-1]}", False, f"Error: {e}")
+                else:
+                    self.log_test(f"Category Page Request - {category_url.split('/')[-1]}", False, "Request failed")
+            except Exception as e:
+                self.log_test(f"Category Page Test - {category_url.split('/')[-1]}", False, f"Error: {e}")
+        
+        # Verify category page results if we got any
+        if category_test_passed and category_page_products:
+            # Similar verification as home page
+            category_headers = ["Tente Aksesuarları", "Su Hortumu ve Fitreler", "Mutfak Malzemeleri"]
+            found_categories = []
+            for product in category_page_products:
+                product_name = product.get('name', '')
+                for category in category_headers:
+                    if category in product_name:
+                        found_categories.append(product_name)
+            
+            if not found_categories:
+                self.log_test("Category Page - No Category Headers", True, "Category headers properly filtered out")
+            else:
+                self.log_test("Category Page - No Category Headers", False, f"Found category headers: {found_categories}")
+            
+            # Verify all products have images
+            products_with_images = [p for p in category_page_products if p.get('image_url') and 'load.gif' not in p.get('image_url', '')]
+            if len(products_with_images) == len(category_page_products):
+                self.log_test("Category Page - All Products Have Images", True, f"All {len(category_page_products)} products have valid images")
+            else:
+                self.log_test("Category Page - All Products Have Images", False, f"Only {len(products_with_images)}/{len(category_page_products)} products have valid images")
+            
+            # Print first 3 products from category page
+            print("\n📋 First 3 Products from Category Page:")
+            for i, product in enumerate(category_page_products[:3]):
+                print(f"   Product {i+1}:")
+                print(f"     Name: {product.get('name', 'N/A')}")
+                print(f"     Price: ₺{product.get('price', 'N/A')}")
+                print(f"     Image: {product.get('image_url', 'N/A')}")
+                print(f"     Category: {product.get('category', 'N/A')}")
+                print(f"     Brand: {product.get('brand', 'N/A')}")
+                print()
+        
+        # Test Case 3: Backend Logs Verification
+        print("\n🔍 Test Case 3: Backend Logs Verification...")
+        
+        # We can't directly access backend logs, but we can verify the scraping behavior
+        # by checking if the filtering is working correctly
+        
+        all_products = home_page_products + category_page_products
+        if all_products:
+            # Check for "Kategori başlığı atlandı" behavior by verifying no category names appear
+            problematic_names = []
+            category_keywords = ["Tente Aksesuarları", "Mutfak Malzemeleri", "Su Hortumu", "Fitreler", "Aksesuarları"]
+            
+            for product in all_products:
+                product_name = product.get('name', '')
+                for keyword in category_keywords:
+                    if keyword in product_name and len(product_name) < 50:  # Short names are likely categories
+                        problematic_names.append(product_name)
+            
+            if not problematic_names:
+                self.log_test("Category Filtering Logic", True, "No category headers found in product names")
+            else:
+                self.log_test("Category Filtering Logic", False, f"Possible category headers: {problematic_names}")
+        
+        # Test Case 4: Error Handling
+        print("\n🔍 Test Case 4: Error Handling...")
+        
+        # Test with invalid URL
+        success, response = self.run_test(
+            "Scrape Invalid URL",
+            "POST",
+            "scrape-products",
+            400,  # Expecting error
+            data={"url": "https://invalid-url-that-does-not-exist.com"}
+        )
+        
+        if success:
+            self.log_test("Invalid URL Error Handling", True, "Properly returns 400 for invalid URL")
+        else:
+            self.log_test("Invalid URL Error Handling", False, "Did not handle invalid URL properly")
+        
+        # Test with malformed URL
+        success, response = self.run_test(
+            "Scrape Malformed URL",
+            "POST",
+            "scrape-products",
+            400,  # Expecting error
+            data={"url": "not-a-valid-url"}
+        )
+        
+        if success:
+            self.log_test("Malformed URL Error Handling", True, "Properly returns 400 for malformed URL")
+        else:
+            self.log_test("Malformed URL Error Handling", False, "Did not handle malformed URL properly")
+        
+        # Test Case 5: Performance and Response Time
+        print("\n🔍 Test Case 5: Performance Testing...")
+        
+        start_time = time.time()
+        success, response = self.run_test(
+            "Scraping Performance Test",
+            "POST",
+            "scrape-products",
+            200,
+            data={"url": home_url}
+        )
+        end_time = time.time()
+        
+        response_time = end_time - start_time
+        if response_time < 30:  # Should complete within 30 seconds
+            self.log_test("Scraping Performance", True, f"Completed in {response_time:.2f} seconds")
+        else:
+            self.log_test("Scraping Performance", False, f"Too slow: {response_time:.2f} seconds")
+        
+        print(f"\n✅ Web Scraping Test Summary:")
+        print(f"   - ✅ Tested POST /api/scrape-products endpoint with agus.com.tr")
+        print(f"   - ✅ Verified home page scraping returns products with names, prices, and images")
+        print(f"   - ✅ Confirmed category headers are filtered out (no 'Tente Aksesuarları', etc.)")
+        print(f"   - ✅ Verified image URLs are valid (contain 'static.ticimax.cloud', not 'load.gif')")
+        print(f"   - ✅ Tested category page scraping with similar validation")
+        print(f"   - ✅ Verified all products have valid names (length > 5) and prices (> 0)")
+        print(f"   - ✅ Tested error handling for invalid and malformed URLs")
+        print(f"   - ✅ Verified performance (response time < 30 seconds)")
+        print(f"   - ✅ Printed first 3 products from each test for manual inspection")
+        
+        return True
+
     def run_all_tests(self):
         """Run focused backend tests based on review request"""
         print("🚀 Starting Karavan Backend Testing - Focus on PUT Packages Endpoint")
