@@ -7016,6 +7016,21 @@ function App() {
               </Button>
             </div>
             
+            {/* Cookie Girişi */}
+            <div>
+              <Label htmlFor="cookies" className="text-sm font-medium">
+                Cookie (B2B giriş için opsiyonel)
+              </Label>
+              <Input
+                id="cookies"
+                placeholder="session_id=abc123; auth_token=xyz789"
+                value={scrapeCookies}
+                onChange={(e) => setScrapeCookies(e.target.value)}
+                disabled={isScraping}
+                className="mt-1"
+              />
+            </div>
+            
             {/* Firma Seçimi */}
             {scrapedProducts.length > 0 && (
               <>
