@@ -5642,6 +5642,136 @@ async def check_auth(current_user: str = Depends(get_current_user_optional)):
         "username": current_user
     }
 
+# ==================== WEB SCRAPING ====================
+
+class ScrapeRequest(BaseModel):
+    url: str
+    
+class ScrapedProduct(BaseModel):
+    name: str
+    price: Optional[float] = None
+    image_url: Optional[str] = None
+    description: Optional[str] = None
+    category: Optional[str] = None
+    brand: Optional[str] = None
+    currency: Optional[str] = "TRY"
+
+@api_router.post("/scrape-products")
+async def scrape_products(request: ScrapeRequest):
+    """Web sitesinden ürünleri scrape eder"""
+    from bs4 import BeautifulSoup
+    import re
+    
+    try:
+        print(f"🌐 Scraping URL: {request.url}")
+        
+        # URL'i fetch et
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+        response = requests.get(request.url, headers=headers, timeout=30)
+        response.raise_for_status()
+        
+        print(f"✅ Sayfa başarıyla indirildi. Boyut: {len(response.content)} bytes")
+        
+        # HTML'i parse et
+        soup = BeautifulSoup(response.content, 'lxml')
+        
+        # Ürünleri bul - Yaygın HTML yapıları
+        products = []
+        
+        # Stratejiler:
+        # 1. Product card'ları bul (class içinde "product" kelimesi olanlar)
+        product_containers = (
+            soup.find_all(['div', 'article', 'li'], class_=re.compile(r'product', re.I)) or
+            soup.find_all(['div', 'article', 'li'], class_=re.compile(r'item', re.I)) or
+            soup.find_all(['div', 'article'], attrs={'data-product-id': True})
+        )
+        
+        print(f"📦 {len(product_containers)} potansiyel ürün container bulundu")
+        
+        for container in product_containers[:50]:  # İlk 50 ürün
+            try:
+                # Ürün adı
+                name_elem = (
+                    container.find(['h1', 'h2', 'h3', 'h4', 'a'], class_=re.compile(r'(name|title|product)', re.I)) or
+                    container.find('a', title=True) or
+                    container.find(['h1', 'h2', 'h3', 'h4'])
+                )
+                name = name_elem.get_text(strip=True) if name_elem else None
+                
+                # Fiyat
+                price_elem = (
+                    container.find(class_=re.compile(r'(price|fiyat|amount)', re.I)) or
+                    container.find(['span', 'div', 'p'], attrs={'data-price': True})
+                )
+                price_text = price_elem.get_text(strip=True) if price_elem else None
+                price = None
+                if price_text:
+                    # Sayıları çıkar
+                    price_match = re.search(r'([\d.,]+)', price_text.replace('.', '').replace(',', '.'))
+                    if price_match:
+                        try:
+                            price = float(price_match.group(1))
+                        except:
+                            pass
+                
+                # Görsel
+                img_elem = container.find('img')
+                image_url = None
+                if img_elem:
+                    image_url = img_elem.get('src') or img_elem.get('data-src') or img_elem.get('data-lazy-src')
+                    # Relative URL'i absolute yap
+                    if image_url and not image_url.startswith('http'):
+                        from urllib.parse import urljoin
+                        image_url = urljoin(request.url, image_url)
+                
+                # Kategori
+                category_elem = container.find(class_=re.compile(r'(category|kategori)', re.I))
+                category = category_elem.get_text(strip=True) if category_elem else None
+                
+                # Marka
+                brand_elem = container.find(class_=re.compile(r'(brand|marka)', re.I))
+                brand = brand_elem.get_text(strip=True) if brand_elem else None
+                
+                # Açıklama
+                desc_elem = container.find(class_=re.compile(r'(description|desc|aciklama)', re.I))
+                description = desc_elem.get_text(strip=True) if desc_elem else None
+                
+                # Ürün oluştur
+                if name and (price or image_url):  # En az isim ve (fiyat veya görsel) olmalı
+                    product = ScrapedProduct(
+                        name=name[:200],  # Max 200 karakter
+                        price=price,
+                        image_url=image_url,
+                        description=description[:500] if description else None,
+                        category=category[:100] if category else None,
+                        brand=brand[:100] if brand else None,
+                        currency="TRY"
+                    )
+                    products.append(product.dict())
+                    print(f"✅ Ürün eklendi: {name[:50]}... - ₺{price}")
+                    
+            except Exception as e:
+                print(f"⚠️ Ürün parse hatası: {str(e)}")
+                continue
+        
+        print(f"🎉 Toplam {len(products)} ürün başarıyla parse edildi")
+        
+        return {
+            "success": True,
+            "url": request.url,
+            "products": products,
+            "count": len(products)
+        }
+        
+    except requests.RequestException as e:
+        print(f"❌ HTTP Hatası: {str(e)}")
+        raise HTTPException(status_code=400, detail=f"URL'e erişilemedi: {str(e)}")
+    except Exception as e:
+        print(f"❌ Scraping Hatası: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Scraping hatası: {str(e)}")
+
 # Include the router in the main app
 app.include_router(api_router)
 
