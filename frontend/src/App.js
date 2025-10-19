@@ -6944,6 +6944,153 @@ function App() {
         </DialogContent>
       </Dialog>
 
+      {/* Web Scraping Dialog */}
+      <Dialog open={showScrapeDialog} onOpenChange={setShowScrapeDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+              </svg>
+              Web Sitesinden Ürün Yükle
+            </DialogTitle>
+            <DialogDescription>
+              Bir e-ticaret sitesinin URL'sini girin, ürünleri otomatik olarak çekelim
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            {/* URL Girişi */}
+            <div className="flex gap-2">
+              <Input
+                placeholder="https://www.example.com/urunler"
+                value={scrapeUrl}
+                onChange={(e) => setScrapeUrl(e.target.value)}
+                className="flex-1"
+                disabled={isScraping}
+              />
+              <Button 
+                onClick={scrapeWebsite} 
+                disabled={isScraping || !scrapeUrl.trim()}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                {isScraping ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    Yükleniyor...
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-4 h-4 mr-2" />
+                    Ürünleri Çek
+                  </>
+                )}
+              </Button>
+            </div>
+            
+            {/* Firma Seçimi */}
+            {scrapedProducts.length > 0 && (
+              <>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Firma Seçin</label>
+                  <select
+                    value={scrapeCompanyId}
+                    onChange={(e) => setScrapeCompanyId(e.target.value)}
+                    className="w-full px-3 py-2 border rounded-md"
+                  >
+                    <option value="">Firma seçin...</option>
+                    {companies.map(c => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+                
+                {/* Ürün Listesi */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm font-medium">
+                      Bulunan Ürünler ({scrapedProducts.length})
+                    </label>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setSelectedScrapedProducts(new Set(scrapedProducts.map((_, i) => i)))}
+                      >
+                        Tümünü Seç
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setSelectedScrapedProducts(new Set())}
+                      >
+                        Tümünü Kaldır
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="border rounded-lg max-h-96 overflow-y-auto">
+                    {scrapedProducts.map((product, index) => (
+                      <div
+                        key={index}
+                        className={`flex items-center gap-3 p-3 border-b hover:bg-gray-50 ${
+                          selectedScrapedProducts.has(index) ? 'bg-blue-50' : ''
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedScrapedProducts.has(index)}
+                          onChange={(e) => {
+                            const newSet = new Set(selectedScrapedProducts);
+                            if (e.target.checked) {
+                              newSet.add(index);
+                            } else {
+                              newSet.delete(index);
+                            }
+                            setSelectedScrapedProducts(newSet);
+                          }}
+                          className="rounded"
+                        />
+                        {product.image_url && (
+                          <img
+                            src={product.image_url}
+                            alt={product.name}
+                            className="w-16 h-16 object-cover rounded border"
+                            onError={(e) => {e.target.style.display = 'none'}}
+                          />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-gray-900 truncate">{product.name}</div>
+                          <div className="text-sm text-gray-500">
+                            {product.price ? `₺${product.price.toFixed(2)}` : 'Fiyat yok'}
+                            {product.brand && ` • ${product.brand}`}
+                            {product.category && ` • ${product.category}`}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowScrapeDialog(false)}>
+              İptal
+            </Button>
+            <Button 
+              onClick={saveScratedProducts}
+              disabled={!scrapeCompanyId || selectedScrapedProducts.size === 0}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              <Save className="w-4 h-4 mr-2" />
+              {selectedScrapedProducts.size} Ürünü Kaydet
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Toast Notifications */}
       <Toaster />
     </div>
