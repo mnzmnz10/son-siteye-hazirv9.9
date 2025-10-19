@@ -5747,6 +5747,7 @@ async def scrape_products(request: ScrapeRequest):
                 
                 # Ürün oluştur
                 if name and price:  # İsim VE fiyat zorunlu (kategori başlıklarını filtrele)
+                    seen_names.add(name)  # İsmi kaydet
                     product = ScrapedProduct(
                         name=name[:200],  # Max 200 karakter
                         price=price,
