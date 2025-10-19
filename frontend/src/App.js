@@ -4759,12 +4759,12 @@ function App() {
                                           </div>
                                         ) : (
                                           <div className="space-y-1">
-                                            <div className="flex items-start gap-3 relative z-0">
+                                            <div className="flex items-start gap-3 relative z-0 ml-2">
                                               {product.image_url && (
                                                 <img 
                                                   src={product.image_url} 
                                                   alt={product.name}
-                                                  className="w-12 h-12 object-cover rounded border cursor-pointer hover:opacity-75 transition-opacity relative z-0"
+                                                  className="w-12 h-12 object-cover rounded border cursor-pointer hover:opacity-75 transition-opacity relative z-0 flex-shrink-0"
                                                   onError={(e) => {e.target.style.display = 'none'}}
                                                   onClick={() => openImagePreview(product.image_url, product.name)}
                                                   title="Görseli büyük boyutta görüntülemek için tıklayın"
