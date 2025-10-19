@@ -1398,7 +1398,6 @@ function App() {
       toast.success(`${successCount} ürün başarıyla eklendi!`);
       setShowScrapeDialog(false);
       setScrapeUrl('');
-      setScrapeCookies('');
       setScrapedProducts([]);
       setSelectedScrapedProducts(new Set());
       setScrapeCompanyId('');
