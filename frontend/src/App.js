@@ -7050,7 +7050,7 @@ function App() {
                       
                       return (
                         <div
-                          key={index}
+                          key={`product-${index}-${discount}`}
                           className={`flex items-center gap-3 p-3 border-b hover:bg-gray-50 ${
                             selectedScrapedProducts.has(index) ? 'bg-blue-50' : ''
                           }`}
