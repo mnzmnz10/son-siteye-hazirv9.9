@@ -5744,17 +5744,28 @@ async def scrape_products(request: ScrapeRequest):
                     print(f"⏭️ Atlanan (duplicate): {name[:50]}...")
                     continue
                 
-                # Fiyat - discountPrice veya productPrice içinde ara
+                # Fiyat - birçok farklı yapıyı dene
                 price_elem = (
-                    container.find(class_=re.compile(r'discountPriceSpan', re.I)) or
-                    container.find(class_=re.compile(r'(price|fiyat|amount)', re.I)) or
+                    container.find(class_=re.compile(r'showcase-price-new', re.I)) or  # solarkutu
+                    container.find(class_=re.compile(r'discountPriceSpan', re.I)) or  # agus
+                    container.find(class_=re.compile(r'(price|fiyat|amount)', re.I)) or  # genel
                     container.find(['span', 'div', 'p'], attrs={'data-price': True})
                 )
                 price_text = price_elem.get_text(strip=True) if price_elem else None
                 price = None
                 if price_text:
-                    # Sayıları çıkar (₺3.152,50 formatından 3152.50 çıkar)
-                    price_clean = price_text.replace('₺', '').replace(' ', '').replace('.', '').replace(',', '.')
+                    # Sayıları çıkar - birçok format destekle
+                    # Örnekler: ₺3.152,50 / 15.497,45 TL / $1,234.56
+                    price_clean = price_text.replace('₺', '').replace('TL', '').replace('$', '').replace('€', '').replace(' ', '')
+                    
+                    # Türk formatı: 15.497,45 -> 15497.45
+                    if ',' in price_clean and '.' in price_clean:
+                        # Nokta binlik ayracı, virgül ondalık
+                        price_clean = price_clean.replace('.', '').replace(',', '.')
+                    elif ',' in price_clean:
+                        # Sadece virgül var - ondalık ayracı
+                        price_clean = price_clean.replace(',', '.')
+                    
                     price_match = re.search(r'([\d.]+)', price_clean)
                     if price_match:
                         try:
