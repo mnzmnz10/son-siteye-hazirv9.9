@@ -5646,6 +5646,7 @@ async def check_auth(current_user: str = Depends(get_current_user_optional)):
 
 class ScrapeRequest(BaseModel):
     url: str
+    cookies: Optional[str] = None  # Cookie string for authenticated scraping
     
 class ScrapedProduct(BaseModel):
     name: str
