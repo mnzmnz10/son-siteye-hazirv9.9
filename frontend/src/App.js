@@ -7135,6 +7135,8 @@ function App() {
                                   console.log('Discount updated:', index, clampedValue, newDiscounts);
                                   return newDiscounts;
                                 });
+                                // Force re-render
+                                forceUpdate({});
                               }}
                               placeholder="0"
                               className="w-16 px-2 py-1 text-sm border rounded text-center"
