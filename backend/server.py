@@ -5724,10 +5724,13 @@ async def scrape_products(request: ScrapeRequest):
                     # Eğer container SADECE category header içeriyorsa atla
                     # Yoksa category bilgisini not et ve devam et
                 
-                # Ürün adı - productName class'ına sahip elementi bul
+                # Ürün adı - birçok farklı yapıyı dene
                 name_elem = (
-                    container.find(class_=re.compile(r'productName', re.I)) or
-                    container.find(['h1', 'h2', 'h3', 'h4', 'a'], class_=re.compile(r'(name|title)', re.I)) or
+                    container.find(class_=re.compile(r'showcase-title', re.I)) or  # solarkutu
+                    container.find(class_=re.compile(r'productName', re.I)) or  # agus
+                    container.find(class_=re.compile(r'product.*title', re.I)) or  # genel
+                    container.find(class_=re.compile(r'product.*name', re.I)) or  # genel
+                    container.find(['h1', 'h2', 'h3', 'h4'], class_=re.compile(r'(name|title)', re.I)) or
                     container.find('a', title=True)
                 )
                 name = name_elem.get_text(strip=True) if name_elem else None
