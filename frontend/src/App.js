@@ -7054,13 +7054,15 @@ function App() {
                       const discountedPrice = originalPrice * (1 - discount / 100);
                       
                       // Debug: Log render values
-                      console.log(`Rendering product ${index}:`, {
-                        name: product.name?.substring(0, 30),
-                        discount,
-                        originalPrice,
-                        discountedPrice,
-                        willShowDiscount: discount > 0
-                      });
+                      if (index === 0) {
+                        console.log('=== PRODUCT 0 DEBUG ===');
+                        console.log('product.discount:', product.discount);
+                        console.log('discount variable:', discount);
+                        console.log('originalPrice:', originalPrice);
+                        console.log('discountedPrice:', discountedPrice);
+                        console.log('discount > 0:', discount > 0);
+                        console.log('Will show discount UI:', discount > 0 ? 'YES' : 'NO');
+                      }
                       
                       return (
                         <div
