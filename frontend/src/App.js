@@ -1371,13 +1371,18 @@ function App() {
           name: product.name,
           description: product.description || '',
           list_price: originalPrice, // Orijinal fiyat
-          list_price_try: originalPrice, // Orijinal fiyat TRY
-          custom_price: discountedPrice, // İskontolu fiyat
+          discounted_price: discountPercent > 0 ? discountedPrice : null, // İskontolu fiyat (sadece iskonto varsa)
           currency: 'TRY',
           image_url: product.image_url || '',
           brand: product.brand || '',
           company_id: scrapeCompanyId
         };
+        
+        console.log('Saving product:', product.name, {
+          originalPrice,
+          discountPercent,
+          discountedPrice: discountPercent > 0 ? discountedPrice : null
+        });
         
         const response = await fetch(`${API}/products`, {
           method: 'POST',
