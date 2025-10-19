@@ -6194,6 +6194,109 @@ class KaravanAPITester:
         
         return True
 
+    def test_image_extraction_fix_agus(self):
+        """Test the image extraction fix for agus.com.tr specifically"""
+        print("\n🔍 Testing Image Extraction Fix for agus.com.tr...")
+        
+        # Test the scrape-products endpoint with agus.com.tr
+        scrape_data = {
+            "url": "https://www.agus.com.tr"
+        }
+        
+        success, response = self.run_test(
+            "Scrape Products from agus.com.tr",
+            "POST",
+            "scrape-products",
+            200,
+            data=scrape_data
+        )
+        
+        if not success or not response:
+            self.log_test("Image Extraction Fix Test", False, "Failed to scrape agus.com.tr")
+            return False
+        
+        try:
+            scrape_result = response.json()
+            
+            if not scrape_result.get('success'):
+                self.log_test("Scraping Success", False, f"Scraping failed: {scrape_result}")
+                return False
+            
+            products = scrape_result.get('products', [])
+            if not products:
+                self.log_test("Products Found", False, "No products returned from scraping")
+                return False
+            
+            self.log_test("Products Scraped", True, f"Found {len(products)} products")
+            
+            # Test the first 3 products as requested
+            test_products = products[:3]
+            
+            print(f"\n📋 Testing first 3 products for image extraction fix:")
+            
+            for i, product in enumerate(test_products, 1):
+                product_name = product.get('name', 'Unknown')
+                image_url = product.get('image_url')
+                price = product.get('price')
+                brand = product.get('brand', 'N/A')
+                
+                print(f"\n🔍 Product {i}: {product_name}")
+                print(f"   💰 Price: ₺{price}")
+                print(f"   🏷️ Brand: {brand}")
+                print(f"   🖼️ Image URL: {image_url}")
+                
+                # Test 1: image_url is NOT None
+                if image_url is not None:
+                    self.log_test(f"Product {i} - Image URL Not None", True, f"Image URL exists: {image_url}")
+                else:
+                    self.log_test(f"Product {i} - Image URL Not None", False, "Image URL is None")
+                    continue
+                
+                # Test 2: image_url contains "static.ticimax.cloud"
+                if "static.ticimax.cloud" in image_url:
+                    self.log_test(f"Product {i} - Contains ticimax.cloud", True, f"Valid ticimax URL: {image_url}")
+                else:
+                    self.log_test(f"Product {i} - Contains ticimax.cloud", False, f"Does not contain ticimax.cloud: {image_url}")
+                
+                # Test 3: image_url does NOT contain "load.gif"
+                if "load.gif" not in image_url:
+                    self.log_test(f"Product {i} - No load.gif", True, f"No placeholder image: {image_url}")
+                else:
+                    self.log_test(f"Product {i} - No load.gif", False, f"Contains load.gif placeholder: {image_url}")
+                
+                # Additional validation: Check if URL is accessible
+                try:
+                    import requests
+                    head_response = requests.head(image_url, timeout=10)
+                    if head_response.status_code == 200:
+                        self.log_test(f"Product {i} - Image URL Accessible", True, f"HTTP {head_response.status_code}")
+                    else:
+                        self.log_test(f"Product {i} - Image URL Accessible", False, f"HTTP {head_response.status_code}")
+                except Exception as e:
+                    self.log_test(f"Product {i} - Image URL Accessible", False, f"Error: {e}")
+            
+            # Summary of image extraction fix
+            valid_images = sum(1 for p in test_products if p.get('image_url') and 
+                             "static.ticimax.cloud" in p.get('image_url', '') and 
+                             "load.gif" not in p.get('image_url', ''))
+            
+            if valid_images == len(test_products):
+                self.log_test("Image Extraction Fix Complete", True, f"All {len(test_products)} products have valid image URLs")
+            else:
+                self.log_test("Image Extraction Fix Complete", False, f"Only {valid_images}/{len(test_products)} products have valid images")
+            
+            # Print complete details of first 3 products as requested
+            print(f"\n📋 Complete details of first 3 products:")
+            for i, product in enumerate(test_products, 1):
+                print(f"\n🔍 Product {i} Complete Details:")
+                for key, value in product.items():
+                    print(f"   {key}: {value}")
+            
+            return True
+            
+        except Exception as e:
+            self.log_test("Image Extraction Fix Test", False, f"Error processing response: {e}")
+            return False
     def cleanup_test_data(self):
         """Clean up created test data"""
         print("\n🧹 Cleaning up test data...")
