@@ -7054,20 +7054,13 @@ function App() {
                   
                   <div className="border rounded-lg max-h-96 overflow-y-auto">
                     {scrapedProducts.map((product, index) => {
-                      const discount = product.discount || 0;
+                      // Discount'u parse et - string veya number olabilir
+                      const discountValue = product.discount === '' || product.discount === null || product.discount === undefined 
+                        ? 0 
+                        : (typeof product.discount === 'string' ? parseFloat(product.discount) || 0 : product.discount);
+                      const discount = discountValue;
                       const originalPrice = product.price || 0;
                       const discountedPrice = originalPrice * (1 - discount / 100);
-                      
-                      // Debug: Log render values
-                      if (index === 0) {
-                        console.log('=== PRODUCT 0 DEBUG ===');
-                        console.log('product.discount:', product.discount);
-                        console.log('discount variable:', discount);
-                        console.log('originalPrice:', originalPrice);
-                        console.log('discountedPrice:', discountedPrice);
-                        console.log('discount > 0:', discount > 0);
-                        console.log('Will show discount UI:', discount > 0 ? 'YES' : 'NO');
-                      }
                       
                       return (
                         <div
