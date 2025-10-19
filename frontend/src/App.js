@@ -112,6 +112,14 @@ function App() {
   const [quickAddQuantity, setQuickAddQuantity] = useState(1);
   const [showQuickAddDropdown, setShowQuickAddDropdown] = useState(false);
   
+  // Web scraping için state'ler
+  const [showScrapeDialog, setShowScrapeDialog] = useState(false);
+  const [scrapeUrl, setScrapeUrl] = useState('');
+  const [scrapedProducts, setScrapedProducts] = useState([]);
+  const [selectedScrapedProducts, setSelectedScrapedProducts] = useState(new Set());
+  const [scrapeCompanyId, setScrapeCompanyId] = useState('');
+  const [isScraping, setIsScraping] = useState(false);
+  
   // Kategori ürün atama için state'ler
   const [showCategoryProductDialog, setShowCategoryProductDialog] = useState(false);
   const [selectedCategoryForProducts, setSelectedCategoryForProducts] = useState(null);
