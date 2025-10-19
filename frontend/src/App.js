@@ -118,6 +118,7 @@ function App() {
   const [scrapedProducts, setScrapedProducts] = useState([]);
   const [selectedScrapedProducts, setSelectedScrapedProducts] = useState(new Set());
   const [scrapeCompanyId, setScrapeCompanyId] = useState('');
+  const [productDiscounts, setProductDiscounts] = useState({}); // Her ürün için iskonto oranı
   const [isScraping, setIsScraping] = useState(false);
   
   // Kategori ürün atama için state'ler
