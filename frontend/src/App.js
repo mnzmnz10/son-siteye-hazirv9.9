@@ -7096,12 +7096,15 @@ function App() {
                           <div className="flex-1 min-w-0">
                             <div className="font-medium text-gray-900 truncate">{product.name}</div>
                             <div className="text-sm space-y-1">
-                              <div className="flex items-center gap-2">
-                                {discount > 0 ? (
+                              {/* Orijinal Fiyat */}
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className={discount > 0 ? "line-through text-gray-400" : "text-gray-900 font-medium"}>
+                                  ₺{originalPrice.toFixed(2)}
+                                </span>
+                                
+                                {/* İndirimli Fiyat - Sadece iskonto varsa */}
+                                {discount > 0 && (
                                   <>
-                                    <span className="line-through text-gray-400">
-                                      ₺{originalPrice.toFixed(2)}
-                                    </span>
                                     <span className="text-green-600 font-bold text-base">
                                       ₺{discountedPrice.toFixed(2)}
                                     </span>
@@ -7109,12 +7112,9 @@ function App() {
                                       %{discount} İndirim
                                     </span>
                                   </>
-                                ) : (
-                                  <span className="text-gray-900 font-medium">
-                                    ₺{originalPrice.toFixed(2)}
-                                  </span>
                                 )}
                               </div>
+                              
                               <div className="text-gray-500">
                                 {product.brand && `${product.brand}`}
                                 {product.category && ` • ${product.category}`}
