@@ -5664,18 +5664,11 @@ async def scrape_products(request: ScrapeRequest):
     
     try:
         print(f"🌐 Scraping URL: {request.url}")
-        if request.cookies:
-            print(f"🍪 Using cookies for authenticated scraping")
         
         # URL'i fetch et
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
         }
-        
-        # Cookie varsa ekle
-        if request.cookies:
-            headers['Cookie'] = request.cookies
-        
         response = requests.get(request.url, headers=headers, timeout=30)
         response.raise_for_status()
         
