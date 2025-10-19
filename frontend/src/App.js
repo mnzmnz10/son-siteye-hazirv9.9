@@ -1316,10 +1316,7 @@ function App() {
       const response = await fetch(`${API}/scrape-products`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          url: scrapeUrl,
-          cookies: scrapeCookies.trim() || null  // Cookie varsa gönder
-        })
+        body: JSON.stringify({ url: scrapeUrl })
       });
       
       if (!response.ok) {
