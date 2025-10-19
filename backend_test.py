@@ -14333,6 +14333,10 @@ class KaravanAPITester:
         print("=" * 80)
         
         try:
+            # PRIORITY 0: WEB SCRAPING ENDPOINT TESTING (CURRENT REVIEW REQUEST)
+            print("\n🎯 PRIORITY 0: WEB SCRAPING ENDPOINT TESTING - agus.com.tr (CURRENT REVIEW REQUEST)")
+            self.test_web_scraping_agus_comprehensive()
+            
             # PRIORITY 1: TURKISH REVIEW REQUEST - Package Product Remove Feature Testing
             print("\n🎯 PRIORITY 1: TURKISH REVIEW REQUEST - Package Product Remove Feature Testing")
             self.test_package_product_remove_feature_comprehensive()
