@@ -115,7 +115,6 @@ function App() {
   // Web scraping için state'ler
   const [showScrapeDialog, setShowScrapeDialog] = useState(false);
   const [scrapeUrl, setScrapeUrl] = useState('');
-  const [scrapeCookies, setScrapeCookies] = useState(''); // B2B login için cookie
   const [scrapedProducts, setScrapedProducts] = useState([]);
   const [selectedScrapedProducts, setSelectedScrapedProducts] = useState(new Set());
   const [scrapeCompanyId, setScrapeCompanyId] = useState('');
