@@ -1351,12 +1351,22 @@ function App() {
     
     try {
       let successCount = 0;
-      for (const product of selectedItems) {
+      for (let i = 0; i < scrapedProducts.length; i++) {
+        if (!selectedScrapedProducts.has(i)) continue;
+        
+        const product = scrapedProducts[i];
+        const discountPercent = productDiscounts[i] || 0;
+        const originalPrice = product.price || 0;
+        
+        // İskonto hesapla
+        const discountedPrice = originalPrice * (1 - discountPercent / 100);
+        
         const productData = {
           name: product.name,
           description: product.description || '',
-          list_price: product.price || 0,
-          list_price_try: product.price || 0,
+          list_price: originalPrice, // Orijinal fiyat
+          list_price_try: originalPrice, // Orijinal fiyat TRY
+          custom_price: discountedPrice, // İskontolu fiyat
           currency: 'TRY',
           image_url: product.image_url || '',
           brand: product.brand || '',
@@ -1380,6 +1390,7 @@ function App() {
       setScrapedProducts([]);
       setSelectedScrapedProducts(new Set());
       setScrapeCompanyId('');
+      setProductDiscounts({});
       await fetchProducts();
     } catch (error) {
       console.error('Kaydetme hatası:', error);
