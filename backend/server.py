@@ -5747,16 +5747,37 @@ async def scrape_products(request: ScrapeRequest):
                     img_elem = image_container.find('img')
                     if img_elem:
                         # data-src öncelikli (lazy loading), sonra src
-                        image_url = img_elem.get('data-src') or img_elem.get('src') or img_elem.get('data-lazy-src')
+                        data_src = img_elem.get('data-src')
+                        src = img_elem.get('src')
+                        data_lazy_src = img_elem.get('data-lazy-src')
+                        
+                        # Debug logging for image extraction
+                        if name and 'Suga Karavan Tente' in name:
+                            print(f"🔍 DEBUG - Image extraction for {name[:30]}...")
+                            print(f"   data-src: {data_src}")
+                            print(f"   src: {src}")
+                            print(f"   data-lazy-src: {data_lazy_src}")
+                        
+                        image_url = data_src or src or data_lazy_src
                         
                         # load.gif, placeholder veya loading içeriyorsa geçersiz say
                         if image_url and ('load.gif' in image_url or 'placeholder' in image_url.lower() or 'loading' in image_url.lower()):
+                            if name and 'Suga Karavan Tente' in name:
+                                print(f"   FILTERED OUT: {image_url}")
                             image_url = None
+                        else:
+                            if name and 'Suga Karavan Tente' in name:
+                                print(f"   PASSED FILTER: {image_url}")
                         
                         # Relative URL'i absolute yap
                         if image_url and not image_url.startswith('http'):
                             from urllib.parse import urljoin
                             image_url = urljoin(request.url, image_url)
+                            if name and 'Suga Karavan Tente' in name:
+                                print(f"   ABSOLUTE URL: {image_url}")
+                else:
+                    if name and 'Suga Karavan Tente' in name:
+                        print(f"🔍 DEBUG - No image container found for {name[:30]}...")
                 
                 # Kategori - itemCategoryLine veya category class'ından al (ama itemCategory a tag'i değil!)
                 category = None
